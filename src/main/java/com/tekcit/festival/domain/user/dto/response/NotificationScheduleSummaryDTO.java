@@ -12,4 +12,5 @@ public class NotificationScheduleSummaryDTO {
     private String title;
     private String body;
     private LocalDateTime sendTime;
+    private Boolean sent;
 }

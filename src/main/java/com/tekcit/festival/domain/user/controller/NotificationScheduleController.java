@@ -60,6 +60,9 @@ public class NotificationScheduleController {
         if (schedule == null) {
             return ResponseEntity.status(404).body("❌ 해당 스케줄 없음");
         }
+        if (schedule.isSent()) {
+            return ResponseEntity.status(400).body("❌ 이미 발송된 공지는 수정할 수 없습니다.");
+        }
 
         Festival festival = festivalRepository.findById(request.getFestivalId())
                 .orElseThrow(() -> new IllegalArgumentException("❌ 존재하지 않는 공연입니다."));
@@ -77,6 +80,9 @@ public class NotificationScheduleController {
     public ResponseEntity<?> deleteSchedule(@PathVariable Long id) {
         return scheduleRepository.findById(id)
                 .map(schedule -> {
+                    if (schedule.isSent()) {
+                        return ResponseEntity.status(400).body("❌ 이미 발송된 공지는 삭제할 수 없습니다.");
+                    }
                     scheduleRepository.delete(schedule);
                     return ResponseEntity.ok("🗑️ 예약 삭제 완료");
                 })
