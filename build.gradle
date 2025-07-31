@@ -30,12 +30,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-aop' // Slf4j 로그용 추가 
 
 	// MariaDB
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
 	// Logging
-	implementation 'org.slf4j:slf4j-api'
+	//implementation 'org.slf4j:slf4j-api'
 
 	// Swagger (SpringDoc OpenAPI 3)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
@@ -58,3 +60,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+

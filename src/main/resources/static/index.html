@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>FCM 푸시 알림 테스트 페이지</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ✅ Firebase CDN 방식 (compat 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
+
+    <!-- ✅ 메시지 처리용 JS -->
+    <script defer src="/main.js"></script>
+</head>
+<body>
+<h1>FCM 푸시 알림 테스트 페이지</h1>
+<button onclick="requestPushPermission()">🔔 알림 권한 요청</button>
+</body>
+</html>

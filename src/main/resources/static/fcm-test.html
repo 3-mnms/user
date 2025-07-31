@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>FCM 테스트</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+</head>
+<body>
+<h2>🔔 FCM 푸시 테스트</h2>
+<button onclick="registerAndSendToken()">📤 토큰 발급 + 서버 전송</button>
+<pre id="result"></pre>
+
+<script>
+    // 1. Firebase 설정 (콘솔에서 복사한 값 입력)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJ9T7mt7CtwZm1E89qLK-1XeRitcwV-Es",
+      authDomain: "fcmtest-bd402.firebaseapp.com",
+      projectId: "fcmtest-bd402",
+      storageBucket: "fcmtest-bd402.firebasestorage.app",
+      messagingSenderId: "603915203012",
+      appId: "1:603915203012:web:fb00e2ef0dab3fb51ef491"
+    };
+
+    const VAPID_KEY = "BGhAum-SJ8ZrzB6LU5Y2-eBEwzgqK599sBKt60_6w0Aw8cKWTEQRZQ8slpUX4vJJ-wsXRyIvM5znTDaUncqxm5o"; // Web Push 인증 키
+
+    // 2. Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    // 3. 토큰 발급 + 서버 전송
+    async function registerAndSendToken() {
+      try {
+        const registration = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+        const currentToken = await messaging.getToken({
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: registration
+        });
+
+        if (currentToken) {
+          console.log("✅ FCM 토큰:", currentToken);
+          document.getElementById("result").textContent = "✅ 토큰: " + currentToken;
+
+          // 서버로 토큰 전송
+          const res = await fetch("http://localhost:8080/fcm/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: 1, token: currentToken })
+          });
+          const msg = await res.text();
+          console.log("📤 서버 응답:", msg);
+        } else {
+          document.getElementById("result").textContent = "❌ 토큰 발급 실패: 권한 거부됨";
+        }
+      } catch (err) {
+        console.error("❌ FCM 오류:", err);
+        document.getElementById("result").textContent = "⚠️ 오류: " + err.message;
+      }
+    }
+
+    // 4. 포그라운드 알림 수신 처리
+    messaging.onMessage((payload) => {
+      console.log("💬 포그라운드 메시지 수신:", payload);
+      alert(`🔔 ${payload.notification?.title}\n${payload.notification?.body}`);
+    });
+</script>
+</body>
+</html>

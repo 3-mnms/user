@@ -1,55 +1,77 @@
-HELP.md
-.gradle
-build/
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Build
+/build/
+.gradle/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
+# IDE
 ### IntelliJ IDEA ###
-.idea
-*.iws
+.idea/
 *.iml
+*.iws
 *.ipr
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+### Eclipse / STS ###
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
 ### VS Code ###
 .vscode/
 
-# 로그 파일
+# Logs
 logs/
 *.log
 *.log.*
 
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Env Files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+application-*.yml
+application-*.properties
 
+# Firebase
+src/main/resources/firebase/
+firebase-adminsdk*.json
+firebase-service-key.json
 
-# 민감한 설정 파일들
+# Sensitive properties
+application-secret.properties
+*.secret.properties
 src/main/resources/application-secret.properties
 src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
-*.secret.properties
+
+# Test / Coverage
+coverage/
+*.exec
+jacoco*.exec
+
+# Database (if applicable)
+*.db
+*.sqlite
+
+# Other
+*.swp
+*.swo
