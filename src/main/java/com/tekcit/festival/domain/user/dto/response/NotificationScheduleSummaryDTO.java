@@ -7,10 +7,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class ScheduleSimpleDTO {
-    private Long id;
+public class NotificationScheduleSummaryDTO {
+    private Long scheduleId;
     private String title;
     private String body;
     private LocalDateTime sendTime;
-    private Long festivalId;
 }

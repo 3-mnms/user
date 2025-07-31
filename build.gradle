@@ -38,15 +38,6 @@ dependencies {
 	// MariaDB
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
-	// Logging
-	//implementation 'org.slf4j:slf4j-api'
-
-	// Swagger (SpringDoc OpenAPI 3)
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-	// Email
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-
 	// Firebase Admin
 	implementation 'com.google.firebase:firebase-admin:9.5.0'
 
@@ -54,10 +45,14 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// MapStruct
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0' // Lombok + MapStruct 호환
+
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 }
 
 tasks.named('test') {
