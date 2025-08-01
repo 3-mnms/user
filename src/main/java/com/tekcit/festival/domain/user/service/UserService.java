@@ -1,6 +1,5 @@
 package com.tekcit.festival.domain.user.service;
 
-import com.tekcit.festival.domain.user.dto.request.HostProfileDTO;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
@@ -25,6 +24,7 @@ import java.time.LocalDate;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
         validateDuplicate(signupUserDTO);

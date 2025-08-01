@@ -1,4 +1,4 @@
-package com.tekcit.festival.config;
+package com.tekcit.festival.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

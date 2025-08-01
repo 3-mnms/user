@@ -1,19 +1,16 @@
 package com.tekcit.festival.domain.user.dto.request;
 
-import com.tekcit.festival.domain.user.entity.HostProfile;
 import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "회원 생성 DTO", name = "SignupUserDTO")
+@Schema(description = "회원 생성 요청 DTO", name = "SignupUserDTO")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
