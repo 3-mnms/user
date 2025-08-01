@@ -1,5 +1,4 @@
 package com.tekcit.festival.exception;
-
 import lombok.Getter;
 
 @Getter
