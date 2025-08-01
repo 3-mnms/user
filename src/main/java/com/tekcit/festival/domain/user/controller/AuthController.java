@@ -1,18 +1,16 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,4 +31,24 @@ public class AuthController {
         authService.logout(request, response);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<LoginResponseDTO> reissue(HttpServletRequest request, HttpServletResponse response) {
+        LoginResponseDTO newToken = authService.reissue(request, response);
+        return ResponseEntity.ok(newToken);
+    }
+
+    @RestController
+    @RequestMapping("/api/users")
+    @RequiredArgsConstructor
+    public class UserController {
+
+        @GetMapping("/me")
+        public ResponseEntity<String> getMyInfo(Authentication authentication) {
+            // SecurityContext에서 로그인한 사용자 정보 확인
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok("Hello, " + userDetails.getUsername());
+        }
+    }
+
 }

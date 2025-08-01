@@ -4,7 +4,7 @@ import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.repository.UserRepository;
-import com.tekcit.festival.config.security.JwtTokenProvider;
+import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,35 +52,23 @@ public class AuthService {
         //refreshToken cookie에서 가져옴
         String refreshToken = cookieUtil.resolveRefreshToken(request);
 
-        //refreshToken 만료일 때 로그아웃 요청
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-            ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-            String loginId = jwtTokenProvider.getLoginIdIfExpired(refreshToken);
-            if (loginId != null) {
-                userRepository.findByLoginId(loginId).ifPresent(user -> {
-                    user.updateRefreshToken(null);
-                    userRepository.save(user);
-                });
-            }
-            throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
-        }
-
-        //refreshToken에서 loginId 정보 get
-        String loginId = jwtTokenProvider.getLoginId(refreshToken);
-
-        //loginId로 user조회
-        User user = userRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        //refreshToken null로
-        user.updateRefreshToken(null);
-        userRepository.save(user);
+        // refreshToken이 아예 없는 경우 처리
+        if (refreshToken == null)
+            return;
 
         //cookie에서 refreshToken삭제
         ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+
+        if (loginId == null)
+            return;
+
+        userRepository.findByLoginId(loginId).ifPresent(user -> {
+            user.updateRefreshToken(null);
+            userRepository.save(user);
+        });
     }
 
     @Transactional
