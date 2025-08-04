@@ -38,17 +38,10 @@ public class AuthController {
         return ResponseEntity.ok(newToken);
     }
 
-    @RestController
-    @RequestMapping("/api/users")
-    @RequiredArgsConstructor
-    public class UserController {
-
-        @GetMapping("/me")
-        public ResponseEntity<String> getMyInfo(Authentication authentication) {
+    @GetMapping("/me")
+    public ResponseEntity<String> getMyInfo(Authentication authentication) {
             // SecurityContext에서 로그인한 사용자 정보 확인
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return ResponseEntity.ok("Hello, " + userDetails.getUsername());
-        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok("Hello, " + userDetails.getUsername());
     }
-
 }
