@@ -15,7 +15,8 @@ public enum ErrorCode {
     //    AUTH 관련 에러입니다.
     AUTH_PASSWORD_NOT_EQUAL_ERROR("U005","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
     AUTH_REFRESH_TOKEN_EXPIRED("U006", "Refresh Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
-    AUTH_REFRESH_TOKEN_NOT_MATCH("U007", "Refresh Token이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+    AUTH_REFRESH_TOKEN_NOT_MATCH("U007", "Refresh Token이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    AUTH_NOT_ALLOWED("U008", "허용되지 않는 행동입니다.", HttpStatus.FORBIDDEN);
 
     private final String code;        // A001, A002 등
     private final String message;     // 사용자에게 보여줄 메시지

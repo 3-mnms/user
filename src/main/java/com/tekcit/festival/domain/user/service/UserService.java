@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.service;
 
+import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
@@ -7,11 +8,13 @@ import com.tekcit.festival.domain.user.entity.HostProfile;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.UserGender;
+import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +37,7 @@ public class UserService {
 
         UserProfileDTO userProfileDTO = signupUserDTO.getUserProfile();
         String rNum = userProfileDTO.getResidentNum();
-        UserProfile userProfile = userProfileDTO.toEntity(calcAge(rNum), extractGender(rNum));
+        UserProfile userProfile = userProfileDTO.toEntity(calcAge(rNum), extractGender(rNum), calcBirth(rNum));
 
         userProfile.setUser(user);
         user.setUserProfile(userProfile);
@@ -58,6 +61,35 @@ public class UserService {
         return UserResponseDTO.fromEntity(user);
     }
 
+    @Transactional
+    public void changeState(Long userId, boolean active, Authentication authentication){
+        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+        User adminUser = currentUser.getUser();
+
+        // 운영자 권한 확인
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        User changeUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (changeUser.getRole() == UserRole.USER) {
+            if(active)
+                changeUser.getUserProfile().activate();
+            else
+                changeUser.getUserProfile().deactivate();
+        }
+        else if(changeUser.getRole() == UserRole.HOST){
+            if(active)
+                changeUser.getHostProfile().activate();
+            else
+                changeUser.getHostProfile().deactivate();
+        }
+        else
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+    }
+
     public int calcAge(String residentNum){
         if (residentNum == null || !residentNum.contains("-")) {
             throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
@@ -68,8 +100,6 @@ public class UserService {
         char gender = rArray[1].charAt(0);
 
         int year = Integer.parseInt(birth.substring(0, 2));
-        int month = Integer.parseInt(birth.substring(2, 4));
-        int date = Integer.parseInt(birth.substring(4, 6));
 
         switch(gender) {
             case '1': case '2': case '5': case '6':
@@ -86,6 +116,17 @@ public class UserService {
         }
         int currentYear = LocalDate.now().getYear();
         return currentYear-year+1;
+    }
+
+    public String calcBirth(String residentNum){
+        if (residentNum == null || !residentNum.contains("-")) {
+            throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
+        }
+
+        String[] rArray = residentNum.split("-");
+        String birth = rArray[0];
+
+        return birth;
     }
 
     public UserGender extractGender(String residentNum){

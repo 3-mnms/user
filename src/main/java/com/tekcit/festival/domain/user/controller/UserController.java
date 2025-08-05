@@ -3,6 +3,7 @@ package com.tekcit.festival.domain.user.controller;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value="/signupUser")
+    @Operation(summary = "회원 가입(일반 유저)",
+            description = "일반 유저 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupUser")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(일반 유저)",
                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
@@ -37,6 +41,8 @@ public class UserController {
     }
 
     @PostMapping(value="/signupHost")
+    @Operation(summary = "회원 가입(축제 주최측)",
+            description = "축제 주최측 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupHost")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(축제 주최측)",
                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
@@ -50,6 +56,17 @@ public class UserController {
         return ResponseEntity.ok(signupHost);
     }
 
-
+    @PatchMapping(value="/{userId}/state")
+    @Operation(summary = "회원 상태 변경 (활성화 / 비활성화)",
+            description = "userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경합니다. ex) PATCH /api/users/{userId}/state?active=false")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "203", description = "회원 상태(active) 조정 완료"),
+            @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
+            @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
+    })
+    public ResponseEntity<Void> changeState(@Valid @PathVariable Long userId, @RequestParam boolean active, Authentication authentication){
+        userService.changeState(userId, active, authentication);
+        return ResponseEntity.noContent().build();
+    }
 
 }

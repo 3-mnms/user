@@ -27,10 +27,26 @@ public class UserProfile {
     @Column(name = "gender", nullable = false, length = 10)
     private UserGender gender;
 
+    @Column(name = "birth", nullable = false)
+    private String birth;
+
     @Column(name = "address", nullable = false)
     private String address;
+
+    @Column(name = "isActive", nullable = false)
+    private boolean isActive = true;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public void deactivate() {
+        this.isActive = false;
+    }
+
+    public void activate() {
+        this.isActive = true;
+    }
 }
+
+

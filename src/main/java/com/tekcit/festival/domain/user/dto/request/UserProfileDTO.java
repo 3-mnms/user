@@ -27,11 +27,12 @@ public class UserProfileDTO {
     @NotBlank(message = "주소는 필수 입력사항 입니다.")
     private String address;
 
-    public UserProfile toEntity(int age, UserGender gender){
+    public UserProfile toEntity(int age, UserGender gender, String birth){
         return UserProfile.builder()
                 .residentNum(residentNum)
                 .age(age)
                 .gender(gender)
+                .birth(birth)
                 .address(address)
                 .build();
     }
