@@ -4,6 +4,7 @@ import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
+import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.exception.BusinessException;
@@ -29,7 +30,6 @@ import com.tekcit.festival.exception.ErrorCode;
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieUtil cookieUtil;
 
@@ -48,6 +48,8 @@ public class AuthService {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
+
+        checkState(user);
 
         String accessToken = jwtTokenProvider.createAccessToken(user);
         String refreshToken = jwtTokenProvider.createRefreshToken(user);
@@ -102,6 +104,8 @@ public class AuthService {
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        checkState(user);
+
         //cookie에서 가져온 refreshToken이 조회된 user의 refreshToken과 다르거나 null이면 error
         if (user.getRefreshToken() == null || !user.getRefreshToken().equals(refreshToken)) {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_NOT_MATCH);
@@ -111,6 +115,17 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(user);
 
         return LoginResponseDTO.fromUserAndToken(user, newAccessToken);
+    }
+
+    public void checkState(User user){
+        if (user.getRole().equals(UserRole.USER) && !user.getUserProfile().isActive()) {
+            throw new BusinessException(ErrorCode.USER_DEACTIVATED);
+        }
+
+        if (user.getRole().equals(UserRole.HOST) && !user.getHostProfile().isActive()) {
+            throw new BusinessException(ErrorCode.USER_DEACTIVATED);
+        }
+
     }
 
 }

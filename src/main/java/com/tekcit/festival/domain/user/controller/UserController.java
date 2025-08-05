@@ -60,7 +60,7 @@ public class UserController {
     @Operation(summary = "회원 상태 변경 (활성화 / 비활성화)",
             description = "userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경합니다. ex) PATCH /api/users/{userId}/state?active=false")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "203", description = "회원 상태(active) 조정 완료"),
+            @ApiResponse(responseCode = "204", description = "회원 상태(active) 조정 완료"),
             @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
             @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
     })

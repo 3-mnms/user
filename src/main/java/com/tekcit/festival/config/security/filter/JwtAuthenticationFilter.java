@@ -32,6 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         if(token != null &&jwtTokenProvider.validateToken(token)){
             String loginId = jwtTokenProvider.getLoginId(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginId);
+            if (!userDetails.isEnabled()) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+                response.getWriter().write("정지된 계정입니다.");
+                return;
+            }
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

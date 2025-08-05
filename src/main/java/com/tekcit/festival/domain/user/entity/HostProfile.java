@@ -23,6 +23,7 @@ public class HostProfile {
     private String genre;
 
     @Column(name = "isActive", nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @OneToOne

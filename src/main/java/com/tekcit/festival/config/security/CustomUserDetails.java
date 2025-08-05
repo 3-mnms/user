@@ -1,6 +1,7 @@
 package com.tekcit.festival.config.security;
 
 import com.tekcit.festival.domain.user.entity.User;
+import com.tekcit.festival.domain.user.enums.UserRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,6 +51,17 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // 활성화 여부
+        // 일반 사용자일 경우
+        if (user.getRole() == UserRole.USER && user.getUserProfile() != null) {
+            return user.getUserProfile().isActive();
+        }
+
+        // 축제 주최측일 경우
+        if (user.getRole() == UserRole.HOST && user.getHostProfile() != null) {
+            return user.getHostProfile().isActive();
+        }
+
+        // 운영관리자는 항상 활성
+        return true;
     }
 }

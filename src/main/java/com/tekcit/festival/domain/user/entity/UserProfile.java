@@ -34,6 +34,7 @@ public class UserProfile {
     private String address;
 
     @Column(name = "isActive", nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @OneToOne
