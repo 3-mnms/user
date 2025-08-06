@@ -13,27 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LoginResponseDTO {
-    @Schema(description = "사용자 DB 식별자")
-    private Long userId;
-
-    @Schema(description = "사용자의 로그인 ID")
-    private String loginId;
-
-    @Schema(description = "사용자 이름")
-    private String name;
-
-    @Schema(description = "사용자 role", example = "USER")
-    private String role;
 
     @Schema(description = "JWT 액세스 토큰")
     private String accessToken;
 
     public static LoginResponseDTO fromUserAndToken(User user, String accessToken) {
         return LoginResponseDTO.builder()
-                .userId(user.getUserId())
-                .loginId(user.getLoginId())
-                .name(user.getName())
-                .role(user.getRole().name())
                 .accessToken(accessToken)
                 .build();
     }
