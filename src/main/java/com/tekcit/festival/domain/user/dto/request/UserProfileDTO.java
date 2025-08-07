@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.dto.request;
 
+import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,13 +28,26 @@ public class UserProfileDTO {
     @NotBlank(message = "주소는 필수 입력사항 입니다.")
     private String address;
 
+    @Schema(description = "회원 주소(우편 번호)")
+    @NotBlank(message = "우편 번호는 필수입니다.")
+    private String zipCode;
+
     public UserProfile toEntity(int age, UserGender gender, String birth){
         return UserProfile.builder()
                 .residentNum(residentNum)
                 .age(age)
                 .gender(gender)
                 .birth(birth)
-                .address(address)
                 .build();
     }
+
+    public Address toAddressEntity(UserProfile userProfile){
+        return Address.builder()
+                .address(address)
+                .zipCode(zipCode)
+                .isDefault(true)
+                .userProfile(userProfile)
+                .build();
+    }
+
 }

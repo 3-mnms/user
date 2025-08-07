@@ -4,10 +4,7 @@ import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
-import com.tekcit.festival.domain.user.entity.EmailVerification;
-import com.tekcit.festival.domain.user.entity.HostProfile;
-import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.entity.UserProfile;
+import com.tekcit.festival.domain.user.entity.*;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
@@ -36,12 +33,25 @@ public class UserService {
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
         validateDuplicate(signupUserDTO);
 
+        EmailVerification emailVerification =
+                emailVerificationRepository.findByEmailAndType(signupUserDTO.getEmail(), VerificationType.SIGNUP)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_NOT_FOUND));
+
+        if(!emailVerification.getIsVerified()){
+            throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
+        }
+
         User user = signupUserDTO.toUserEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
+        user.setIsEmailVerified(true);
 
         UserProfileDTO userProfileDTO = signupUserDTO.getUserProfile();
+
         String rNum = userProfileDTO.getResidentNum();
         UserProfile userProfile = userProfileDTO.toEntity(calcAge(rNum), extractGender(rNum), calcBirth(rNum));
+
+        Address address = userProfileDTO.toAddressEntity(userProfile);
+        userProfile.getAddresses().add(address);
 
         userProfile.setUser(user);
         user.setUserProfile(userProfile);
@@ -53,20 +63,11 @@ public class UserService {
     @Transactional
     public UserResponseDTO signupHost(SignupUserDTO signupUserDTO){
         validateDuplicate(signupUserDTO);
-
-        EmailVerification emailVerification =
-                emailVerificationRepository.findByEmailAndType(signupUserDTO.getEmail(), VerificationType.SIGNUP)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_NOT_FOUND));
-
-        if(!emailVerification.getIsVerified()){
-            throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
-        }
-
         User user = signupUserDTO.toHostEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
-        user.setIsEmailVerified(true);
 
         HostProfile hostProfile = signupUserDTO.getHostProfile().toEntity();
+
         hostProfile.setUser(user);
         user.setHostProfile(hostProfile);
 

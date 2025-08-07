@@ -4,6 +4,9 @@ import com.tekcit.festival.domain.user.enums.UserGender;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "userProfiles")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,8 +33,9 @@ public class UserProfile {
     @Column(name = "birth", nullable = false)
     private String birth;
 
-    @Column(name = "address", nullable = false)
-    private String address;
+    @Builder.Default
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
 
     @Column(name = "isActive", nullable = false)
     @Builder.Default

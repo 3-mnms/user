@@ -1,6 +1,5 @@
 package com.tekcit.festival.domain.user.entity;
 
-import com.tekcit.festival.domain.user.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,15 +19,17 @@ public class Address {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "zip_code", nullable = false)
+    private String zipCode;
+
     @Builder.Default
     @Column(name = "is_default", nullable = false)
     private boolean isDefault = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_profile_id", nullable = false)
+    @JoinColumn(name = "u_id", nullable = false)
     private UserProfile userProfile;
 
-    // 편의 메서드 (필요 시)
     public void setAsDefault() {
         this.isDefault = true;
     }
