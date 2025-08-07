@@ -4,11 +4,14 @@ import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
+import com.tekcit.festival.domain.user.entity.EmailVerification;
 import com.tekcit.festival.domain.user.entity.HostProfile;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.domain.user.enums.UserRole;
+import com.tekcit.festival.domain.user.enums.VerificationType;
+import com.tekcit.festival.domain.user.repository.EmailVerificationRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
@@ -27,6 +30,7 @@ import java.time.LocalDate;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
@@ -50,8 +54,17 @@ public class UserService {
     public UserResponseDTO signupHost(SignupUserDTO signupUserDTO){
         validateDuplicate(signupUserDTO);
 
+        EmailVerification emailVerification =
+                emailVerificationRepository.findByEmailAndType(signupUserDTO.getEmail(), VerificationType.SIGNUP)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_NOT_FOUND));
+
+        if(!emailVerification.getIsVerified()){
+            throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
+        }
+
         User user = signupUserDTO.toHostEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
+        user.setIsEmailVerified(true);
 
         HostProfile hostProfile = signupUserDTO.getHostProfile().toEntity();
         hostProfile.setUser(user);

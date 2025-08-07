@@ -35,6 +35,10 @@ public class User extends BaseEntity {
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
+    @Column(name = "is_email_verified", nullable = false)
+    @Builder.Default
+    private Boolean isEmailVerified = false;
+
     //'USER', 'HOST', 'ADMIN'
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 10, nullable = false)

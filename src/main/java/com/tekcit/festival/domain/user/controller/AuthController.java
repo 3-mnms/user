@@ -3,7 +3,6 @@ package com.tekcit.festival.domain.user.controller;
 import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
-import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
+import com.tekcit.festival.exception.global.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 

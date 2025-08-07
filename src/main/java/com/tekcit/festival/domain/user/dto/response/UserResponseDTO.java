@@ -23,7 +23,7 @@ public class UserResponseDTO {
     private UserRole role;
 
     private LocalDateTime createdAt;
-
+    @Schema(hidden = true)
     public static UserResponseDTO fromEntity(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())

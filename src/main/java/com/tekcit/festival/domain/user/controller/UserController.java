@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.ErrorResponse;
+import com.tekcit.festival.exception.global.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
