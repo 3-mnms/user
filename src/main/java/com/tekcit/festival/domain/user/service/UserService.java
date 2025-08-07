@@ -157,6 +157,13 @@ public class UserService {
         return gender;
     }
 
+    public boolean checkLoginId(String loginId){
+        return !userRepository.existsByLoginId(loginId);
+    }
+
+    public boolean checkEmail(String email){
+        return !userRepository.existsByEmail(email);
+    }
     public void validateDuplicate(SignupUserDTO signupUserDTO){
         if(userRepository.existsByLoginId(signupUserDTO.getLoginId()))
             throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, signupUserDTO.getLoginId());

@@ -48,6 +48,8 @@ public class SecurityConfig {
                                 "/api/users/signupHost",
                                 "/api/users/login",
                                 "/api/users/reissue",
+                                "/api/users/checkLoginId",
+                                "/api/users/checkEmail",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/mail/**"

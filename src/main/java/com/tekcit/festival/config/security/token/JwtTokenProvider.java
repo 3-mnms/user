@@ -38,6 +38,7 @@ public class JwtTokenProvider {
                 .setSubject(user.getLoginId())
                 .claim("userId", user.getUserId())
                 .claim("role", user.getRole().name())
+                .claim("name", user.getName())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY))
                 .signWith(signingKey, SignatureAlgorithm.HS256)

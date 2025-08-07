@@ -69,4 +69,19 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping(value="/checkLoginId")
+    @Operation(summary = "로그인 아이디 중복 확인",
+            description = "로그인 아이디 중복 확인, ex) GET /api/users/checkLoginId?loginId=test")
+    public ResponseEntity<Boolean> checkLoginId(@RequestParam String loginId){
+        boolean isLoginIdAvailable = userService.checkLoginId(loginId);
+        return ResponseEntity.ok(isLoginIdAvailable);
+    }
+
+    @GetMapping(value="/checkEmail")
+    @Operation(summary = "이메일 주소 중복 확인",
+            description = "이메일 주소 중복 확인, ex) GET /api/users/checkEmail?email=test@test.com")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email){
+        boolean isEmailAvailable = userService.checkEmail(email);
+        return ResponseEntity.ok(isEmailAvailable);
+    }
 }
