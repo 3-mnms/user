@@ -74,7 +74,7 @@ public class AuthService {
 
         userEventProducer.send(event);
 
-        return LoginResponseDTO.fromUserAndToken(user, accessToken);
+        return LoginResponseDTO.fromToken(accessToken);
     }
 
     @Transactional
@@ -128,7 +128,7 @@ public class AuthService {
         //새로운 accessToken 생성
         String newAccessToken = jwtTokenProvider.createAccessToken(user);
 
-        return LoginResponseDTO.fromUserAndToken(user, newAccessToken);
+        return LoginResponseDTO.fromToken(newAccessToken);
     }
 
     public void checkState(User user){
