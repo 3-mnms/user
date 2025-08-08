@@ -147,10 +147,10 @@ public class UserService {
         char g = residentNum.split("-")[1].charAt(0);
         UserGender gender = UserGender.MALE;
 
-        if(g == 1 || g == 3){
+        if(g == '1' || g == '3'){
             gender = UserGender.MALE;
         }
-        else if(g == 2 || g == 4){
+        else if(g == '2' || g == '4'){
             gender = UserGender.FEMALE;
         }
 
