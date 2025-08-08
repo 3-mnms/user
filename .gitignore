@@ -53,3 +53,6 @@ src/main/resources/application-secret.properties
 src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
 *.secret.properties
+
+private.pem
+**/private.pem
