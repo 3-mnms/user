@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.entity;
 
+import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,6 +44,13 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 10, nullable = false)
     private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "oauth_provider", length = 20, nullable = false)
+    private OAuthProvider oauthProvider; // LOCAL, KAKAO
+
+    @Column(name = "oauth_provider_id", unique = true, length = 100)
+    private String oauthProviderId; // 예: 카카오 id(문자열)
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile userProfile;

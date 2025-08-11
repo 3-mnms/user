@@ -70,11 +70,23 @@ public class KakaoOAuthService {
 
         if(account == null)
             throw new IllegalStateException("카카오 계정 정보가 비었습니다.");
+        String email = (account != null) ? account.getEmail() : null;
 
-        String email = account.getEmail();
 
-        if (email == null || email.isBlank())
-          throw new IllegalStateException("카카오 이메일을 받지 못했습니다. (scope/동의 확인 필요) ");
+        // 방어적으로 상태 확인 (디버깅에 도움)
+        if (email == null) {
+            Boolean needsAgree = (account != null) ? account.getEmailNeedsAgreement() : null;
+            Boolean hasEmail   = (account != null) ? account.getHasEmail() : null;
+            Boolean valid      = (account != null) ? account.getIsEmailValid() : null;
+            Boolean verified   = (account != null) ? account.getIsEmailVerified() : null;
+
+            // 상황에 맞게 예외 처리/로깅
+            throw new IllegalStateException(
+                    "카카오 이메일을 받지 못했습니다. (scope/동의 확인 필요) " +
+                            "needsAgreement=" + needsAgree + ", hasEmail=" + hasEmail +
+                            ", valid=" + valid + ", verified=" + verified
+            );
+        }
 
         return email;
     }
