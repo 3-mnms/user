@@ -1,12 +1,16 @@
 package com.tekcit.festival.config.security.token;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Serializer;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.tekcit.festival.domain.user.entity.User;
+import io.jsonwebtoken.jackson.io.JacksonSerializer; // jjwt-jackson
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -16,6 +20,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -38,6 +43,7 @@ public class JwtTokenProvider {
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
+    private Serializer<Map<String, ?>> jsonSerializer;
 
     @PostConstruct
     public void init() {
@@ -48,6 +54,10 @@ public class JwtTokenProvider {
 
             this.privateKey = loadPrivateKeyFromPem(privatePem);
             this.publicKey  = loadPublicKeyFromPem(publicPem);
+
+            ObjectMapper om = new ObjectMapper();
+            om.getFactory().configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+            this.jsonSerializer = new JacksonSerializer<>(om);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read PEM files", e);
         }
@@ -66,6 +76,7 @@ public class JwtTokenProvider {
                 .claim("name", user.getName())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
+                .serializeToJsonWith(jsonSerializer) // ★ 여기!
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
@@ -80,6 +91,7 @@ public class JwtTokenProvider {
                 .setSubject(user.getLoginId())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
+                .serializeToJsonWith(jsonSerializer) // ★ 여기!
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
