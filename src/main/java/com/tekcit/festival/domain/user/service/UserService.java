@@ -7,6 +7,7 @@ import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.entity.*;
+import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
@@ -51,6 +52,7 @@ public class UserService {
         User user = signupUserDTO.toUserEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
         user.setIsEmailVerified(true);
+        user.setOauthProvider(OAuthProvider.LOCAL);
 
         UserProfileDTO userProfileDTO = signupUserDTO.getUserProfile();
 
@@ -72,6 +74,7 @@ public class UserService {
         validateDuplicate(signupUserDTO);
         User user = signupUserDTO.toHostEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
+        user.setOauthProvider(OAuthProvider.LOCAL);
 
         HostProfile hostProfile = signupUserDTO.getHostProfile().toEntity();
 
@@ -191,8 +194,6 @@ public class UserService {
     public void validateDuplicate(SignupUserDTO signupUserDTO){
         if(userRepository.existsByLoginId(signupUserDTO.getLoginId()))
             throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, signupUserDTO.getLoginId());
-        if(userRepository.existsByPhone(signupUserDTO.getPhone()))
-            throw new BusinessException(ErrorCode.DUPLICATE_PHONE_ID, signupUserDTO.getPhone());
         if(userRepository.existsByEmail(signupUserDTO.getEmail()))
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL_ID, signupUserDTO.getEmail());
     }

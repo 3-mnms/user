@@ -1,6 +1,5 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.service.KakaoOAuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +37,7 @@ public class KakaoAuthController {
     @Value("${kakao.scope}")
     private String scope;
 
-    private final KakaoOAuthService kakaoAuthService;
+    private final KakaoOAuthService kakaoOAuthService;
 
     @GetMapping("/authorize")
     public void redirectToKakao(HttpServletResponse response) throws IOException {
@@ -53,14 +52,14 @@ public class KakaoAuthController {
         response.sendRedirect(url); // 브라우저를 카카오로 리다이렉트
     }
 
-//    @GetMapping("/callback")
-//    public ResponseEntity<LoginResponseDTO> callback(@RequestParam("code") String code, HttpServletResponse response){
-//        // 1) code -> access_token
-//        String kakaoAccessToken = kakaoOAuthService.exchangeCodeForToken(code);
-//
-//        // 2) access_token -> email
-//        String email = kakaoOAuthService.getEmail(kakaoAccessToken);
-//    }
+    @GetMapping("/callback")
+    public ResponseEntity<String> callback(@RequestParam("code") String code, HttpServletResponse response) {
+        // 1) code -> access_token
+        String kakaoAccessToken = kakaoOAuthService.exchangeCodeForAccessToken(code);
 
+        // 2) access_token -> email
+        String email = kakaoOAuthService.fetchEmail(kakaoAccessToken);
+        return ResponseEntity.ok(email);
     }
+}
 
