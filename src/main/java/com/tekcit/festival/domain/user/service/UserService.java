@@ -191,8 +191,6 @@ public class UserService {
     public void validateDuplicate(SignupUserDTO signupUserDTO){
         if(userRepository.existsByLoginId(signupUserDTO.getLoginId()))
             throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, signupUserDTO.getLoginId());
-        if(userRepository.existsByPhone(signupUserDTO.getPhone()))
-            throw new BusinessException(ErrorCode.DUPLICATE_PHONE_ID, signupUserDTO.getPhone());
         if(userRepository.existsByEmail(signupUserDTO.getEmail()))
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL_ID, signupUserDTO.getEmail());
     }
