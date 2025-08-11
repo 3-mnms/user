@@ -53,14 +53,14 @@ public class KakaoAuthController {
         response.sendRedirect(url); // 브라우저를 카카오로 리다이렉트
     }
 
-    @GetMapping("/callback")
-    public ResponseEntity<LoginResponseDTO> callback(@RequestParam("code") String code, HttpServletResponse response){
-        // 1) code -> access_token
-        String kakaoAccessToken = kakaoOAuthService.exchangeCodeForToken(code);
-
-        // 2) access_token -> email
-        String email = kakaoOAuthService.getEmail(kakaoAccessToken);
-    }
+//    @GetMapping("/callback")
+//    public ResponseEntity<LoginResponseDTO> callback(@RequestParam("code") String code, HttpServletResponse response){
+//        // 1) code -> access_token
+//        String kakaoAccessToken = kakaoOAuthService.exchangeCodeForToken(code);
+//
+//        // 2) access_token -> email
+//        String email = kakaoOAuthService.getEmail(kakaoAccessToken);
+//    }
 
     }
 
