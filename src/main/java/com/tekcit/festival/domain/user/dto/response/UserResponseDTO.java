@@ -16,13 +16,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class UserResponseDTO {
+    @Schema(description = "사용자 userId")
     private Long userId;
 
+    @Schema(description = "사용자 이름")
     private String name;
 
+    @Schema(description = "사용자 role")
     private UserRole role;
 
+    @Schema(description = "회원가입 시간")
     private LocalDateTime createdAt;
+
     @Schema(hidden = true)
     public static UserResponseDTO fromEntity(User user) {
         return UserResponseDTO.builder()
