@@ -52,7 +52,8 @@ public class SecurityConfig {
                                 "/api/users/checkEmail",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/mail/**"
+                                "/api/mail/**",
+                                "/api/auth/kakao/authorize"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

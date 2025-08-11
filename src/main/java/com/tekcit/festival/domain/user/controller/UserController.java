@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.controller;
 
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
+import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,5 +84,13 @@ public class UserController {
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email){
         boolean isEmailAvailable = userService.checkEmail(email);
         return ResponseEntity.ok(isEmailAvailable);
+    }
+
+    @GetMapping(value="/booking-profile/{userId}")
+    @Operation(summary = "예약자 정보",
+            description = "예약자 정보, ex) GET /api/users/booking-profile/{userId}")
+    public ResponseEntity<BookingProfileDTO> bookingProfile(@Valid @PathVariable Long userId){
+        BookingProfileDTO bookingProfile = userService.bookingProfile(userId);
+        return ResponseEntity.ok(bookingProfile);
     }
 }

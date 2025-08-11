@@ -3,12 +3,16 @@ package com.tekcit.festival.domain.user.service;
 import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
+import com.tekcit.festival.domain.user.dto.response.AddressDTO;
+import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.entity.*;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
+import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.EmailVerificationRepository;
+import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
@@ -20,12 +24,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
 
@@ -104,6 +111,23 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
     }
 
+    @Transactional(readOnly = true)
+    public BookingProfileDTO bookingProfile(Long userId) {
+        User bookingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Address> addresses = addressRepository.findAllByUserProfile(profile);
+
+        List<AddressDTO> addressDTOS = addresses.stream()
+                .map(address->AddressDTO.fromEntity(address))
+                .toList();
+
+        return BookingProfileDTO.fromEntity(bookingUser, profile, addressDTOS);
+    }
+
     public int calcAge(String residentNum){
         if (residentNum == null || !residentNum.contains("-")) {
             throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
@@ -147,10 +171,10 @@ public class UserService {
         char g = residentNum.split("-")[1].charAt(0);
         UserGender gender = UserGender.MALE;
 
-        if(g == 1 || g == 3){
+        if(g == '1' || g == '3'){
             gender = UserGender.MALE;
         }
-        else if(g == 2 || g == 4){
+        else if(g == '2' || g == '4'){
             gender = UserGender.FEMALE;
         }
 
