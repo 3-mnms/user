@@ -4,14 +4,10 @@ import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
-//import com.tekcit.festival.domain.user.enums.UserEventType;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.exception.BusinessException;
-//import com.tekcit.festival.kafka.UserEventDTO;
-//import com.tekcit.festival.kafka.UserEventProducer;
-import com.tekcit.festival.kafka.UserEventProducer;
 import com.tekcit.festival.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -63,17 +59,6 @@ public class AuthService {
 
         ResponseCookie cookie = cookieUtil.createRefreshTokenCookie(refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-//        UserEventDTO event = new UserEventDTO(
-//                user.getUserId(),
-//                user.getLoginId(),
-//                user.getName(),
-//                user.getEmail(),
-//                UserEventType.LOGGED_IN,
-//                accessToken
-//        );
-//
-//        userEventProducer.send(event);
 
         return LoginResponseDTO.fromToken(accessToken);
     }
