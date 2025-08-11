@@ -111,7 +111,7 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public BookingProfileDTO bookingProfile(Long userId) {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -119,24 +119,13 @@ public class UserService {
         UserProfile profile = userProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        List<Address> addresses = (profile == null)
-                ? List.of()
-                : addressRepository.findAllByUserProfile_uId(profile.getUId());
+        List<Address> addresses = addressRepository.findAllByUserProfile(profile);
 
         List<AddressDTO> addressDTOS = addresses.stream()
-                .map(address -> AddressDTO.builder()
-                        .address(address.getAddress())
-                        .zipCode(address.getZipCode())
-                        .isDefault(address.isDefault())
-                        .build())
+                .map(address->AddressDTO.fromEntity(address))
                 .toList();
 
-        return BookingProfileDTO.builder()
-                .email(bookingUser.getEmail())
-                .phone(bookingUser.getPhone())
-                .birth(profile != null ? profile.getBirth() : null)
-                .addresses(addressDTOS)
-                .build();
+        return BookingProfileDTO.fromEntity(bookingUser, profile, addressDTOS);
     }
 
     public int calcAge(String residentNum){

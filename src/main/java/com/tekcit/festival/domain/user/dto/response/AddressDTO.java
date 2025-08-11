@@ -1,5 +1,7 @@
 package com.tekcit.festival.domain.user.dto.response;
 
+import com.tekcit.festival.domain.user.entity.Address;
+import com.tekcit.festival.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +22,13 @@ public class AddressDTO {
 
     @Schema(description = "사용자 주소 기본 배송지 여부")
     private boolean isDefault;
+
+    @Schema(hidden = true)
+    public static AddressDTO fromEntity(Address address) {
+        return AddressDTO.builder()
+                .address(address.getAddress())
+                .zipCode(address.getZipCode())
+                .isDefault(address.isDefault())
+                .build();
+    }
 }
