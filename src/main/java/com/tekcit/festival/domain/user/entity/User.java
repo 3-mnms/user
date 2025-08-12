@@ -2,11 +2,19 @@ package com.tekcit.festival.domain.user.entity;
 
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_users_login_id", columnNames = {"login_id"}),
+                @UniqueConstraint(name = "uk_users_email", columnNames = {"email"}),
+                @UniqueConstraint(name = "uk_users_provider_pid", columnNames = {"oauth_provider", "oauth_provider_id"})
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -18,10 +26,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "login_id", nullable = false, unique = true)
+    @Column(name = "login_id")
     private String loginId;
 
-    @Column(name = "login_pw", nullable = false)
+    @Column(name = "login_pw")
     private String loginPw;
 
     @Column(name = "name", nullable = false)
@@ -30,7 +38,7 @@ public class User extends BaseEntity {
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "refresh_token", length = 512)
@@ -49,7 +57,7 @@ public class User extends BaseEntity {
     @Column(name = "oauth_provider", length = 20, nullable = false)
     private OAuthProvider oauthProvider; // LOCAL, KAKAO
 
-    @Column(name = "oauth_provider_id", unique = true, length = 100)
+    @Column(name = "oauth_provider_id", length = 100)
     private String oauthProviderId; // 예: 카카오 id(문자열)
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -60,5 +68,28 @@ public class User extends BaseEntity {
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void validateProviderSpecificFields() {
+        if (oauthProvider == null) {
+            throw new IllegalStateException("oauthProvider는 필수입니다.");
+        }
+        switch (oauthProvider) {
+            case LOCAL -> {
+                if ((loginId == null || loginId.isBlank()) || (loginPw == null || loginPw.isBlank()))
+                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "LOCAL 계정은 loginId/loginPw가 필수입니다.");
+                if (oauthProviderId != null)
+                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "LOCAL 계정은 oauthProviderId가 null이어야 합니다.");
+            }
+            case KAKAO -> {
+                if (loginId != null || loginPw != null)
+                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "KAKAO 계정은 loginId/loginPw가 null이어야 합니다.");
+                if ((oauthProviderId == null || oauthProviderId.isBlank()))
+                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "KAKAO 계정은 oauthProviderId가 필수입니다.");
+            }
+            default -> throw new BusinessException(ErrorCode.INVALID_FIELDS, "지원하지 않는 oauthProvider: " + oauthProvider);
+        }
     }
 }

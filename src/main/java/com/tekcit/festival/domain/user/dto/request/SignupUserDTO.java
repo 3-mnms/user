@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.dto.request;
 
 import com.tekcit.festival.domain.user.entity.User;
+import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "회원 생성 요청 DTO", name = "SignupUserDTO")
+@Schema(description = "LOCAL 회원 생성 요청 DTO", name = "SignupUserDTO")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -51,6 +52,8 @@ public class SignupUserDTO {
                 .name(name)
                 .phone(phone)
                 .email(email)
+                .oauthProvider(OAuthProvider.LOCAL)
+                .oauthProviderId(null)
                 .role(UserRole.USER)
                 .build();
     }
@@ -62,6 +65,8 @@ public class SignupUserDTO {
                 .name(name)
                 .phone(phone)
                 .email(email)
+                .oauthProvider(OAuthProvider.LOCAL)
+                .oauthProviderId(null)
                 .role(UserRole.HOST)
                 .build();
     }
@@ -73,6 +78,8 @@ public class SignupUserDTO {
                 .name(name)
                 .phone(phone)
                 .email(email)
+                .oauthProvider(OAuthProvider.LOCAL)
+                .oauthProviderId(null)
                 .role(UserRole.ADMIN)
                 .build();
     }
