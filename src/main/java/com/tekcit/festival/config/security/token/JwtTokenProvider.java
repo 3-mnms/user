@@ -2,6 +2,8 @@ package com.tekcit.festival.config.security.token;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Serializer;
 import jakarta.annotation.PostConstruct;
@@ -32,14 +34,17 @@ public class JwtTokenProvider {
     @Value("${jwt.public-pem-path}")
     private org.springframework.core.io.Resource publicPemPath;
 
-    @Value("${jwt.access-valid-ms:180000000000000}")
+    @Value("${jwt.access-valid-ms}")
     private long accessValidMs;
 
-    @Value("${jwt.refresh-valid-ms:1296000000}")
+    @Value("${jwt.refresh-valid-ms}")
     private long refreshValidMs;
 
-    @Value("${jwt.issuer:festival-user-service}")
+    @Value("${jwt.issuer}")
     private String issuer;
+
+    @Value("${signup.ticket.valid-ms:600000}") // 기본 10분
+    private long signupTicketValidMs;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -96,6 +101,22 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String createSignupTicket(String kakaoId, String email) {
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + signupTicketValidMs);
+
+        return Jwts.builder()
+                .setIssuer(issuer)
+                .setSubject("kakao-signup")
+                .claim("kakaoId", kakaoId)                    // kakaoId
+                .claim("email", email)                    // email
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .serializeToJsonWith(jsonSerializer)
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .compact();
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -141,6 +162,35 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public record SignupTicketClaims(String kakaoId, String email) {}
+
+    public SignupTicketClaims parseSignupTicket(String token) {
+        try {
+            Claims c = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .setAllowedClockSkewSeconds(30)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+
+            if (!"kakao-signup".equals(c.getSubject())) {
+                throw new BusinessException(ErrorCode.INVALID_TICKET, "잘못된 가입 티켓(subject mismatch) 입니다.");
+            }
+
+            String kid = c.get("kid", String.class);
+            String email = c.get("email", String.class);
+
+            if (kid == null || kid.isBlank() || email == null || email.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_TICKET, "카카오 id 또는 카카오 이메일이 올바르지 못합니다.");
+            }
+            return new SignupTicketClaims(kid, email);
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new BusinessException(ErrorCode.INVALID_TICKET, "가입 티켓이 만료되었습니다.");
+        }
     }
 
     // ===== PEM 로더들

@@ -13,15 +13,19 @@ public enum ErrorCode {
     USER_EMAIL_NOT_VERIFIED("U003", "이메일이 인증되지 않았습니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_LOGIN_ID("U004", "이미 존재하는 아이디입니다. ID: %s", HttpStatus.CONFLICT),
     DUPLICATE_EMAIL_ID("U005", "이미 존재하는 이메일입니다. EMAIL: %s", HttpStatus.CONFLICT),
+    DUPLICATE_KAKAO_ID("U006", "이미 존재하는 카카오 계정입니다. KAKAO_ID: %s", HttpStatus.CONFLICT),
     //    AUTH 관련 에러입니다.
-    AUTH_PASSWORD_NOT_EQUAL_ERROR("U006","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
-    AUTH_REFRESH_TOKEN_EXPIRED("U007", "Refresh Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
-    AUTH_REFRESH_TOKEN_NOT_MATCH("U008", "Refresh Token이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
-    AUTH_NOT_ALLOWED("U009", "허용되지 않는 행동입니다.", HttpStatus.FORBIDDEN),
+    AUTH_PASSWORD_NOT_EQUAL_ERROR("U007","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
+    AUTH_REFRESH_TOKEN_EXPIRED("U008", "Refresh Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
+    AUTH_REFRESH_TOKEN_NOT_MATCH("U009", "Refresh Token이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    AUTH_NOT_ALLOWED("U010", "허용되지 않는 행동입니다.", HttpStatus.FORBIDDEN),
 
-    VERIFICATION_NOT_FOUND("U0010", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),
-    VERIFICATION_EXPIRED("U0011","인증 코드가 만료되었습니다.", HttpStatus.GONE),
-    VERIFICATION_CODE_MISMATCH("U0012","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
+    VERIFICATION_NOT_FOUND("U011", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),
+    VERIFICATION_EXPIRED("U012","인증 코드가 만료되었습니다.", HttpStatus.GONE),
+    VERIFICATION_CODE_MISMATCH("U013","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
+
+    INVALID_FIELDS("U014", "%s", HttpStatus.BAD_REQUEST),
+    INVALID_TICKET("U015", "%s", HttpStatus.BAD_REQUEST);
 
     private final String code;        // A001, A002 등
     private final String message;     // 사용자에게 보여줄 메시지

@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -42,9 +40,9 @@ public class KakaoOAuthService {
 
         // WebClient로 POST 요청 보내기
         KakaoTokenResponse tokenResponse = webClient.post()
-                .uri(tokenUri) // "https://kauth.kakao.com/oauth/token"
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED) // curl -H "Content-Type: ..."
-                .body(BodyInserters.fromFormData(form)) // 위에서 만든 form 데이터 넣기
+                .uri(tokenUri)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(form))
                 .retrieve()
                 .bodyToMono(KakaoTokenResponse.class)
                 .block();
@@ -56,7 +54,7 @@ public class KakaoOAuthService {
         return tokenResponse.getAccessToken();
     }
 
-    public String fetchEmail(String accessToken){
+    public KakaoMeResponse fetchMe(String accessToken){
         KakaoMeResponse me = webClient.get()
                 .uri(userinfoUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
@@ -64,31 +62,10 @@ public class KakaoOAuthService {
                 .bodyToMono(KakaoMeResponse.class)
                 .block();
 
-        KakaoMeResponse.KakaoAccount account = Optional.ofNullable(me)
-                .map(KakaoMeResponse::getKakaoAccount)
-                .orElse(null);
+        if (me == null)
+            throw new IllegalStateException("카카오 사용자 정보 조회 실패");
 
-        if(account == null)
-            throw new IllegalStateException("카카오 계정 정보가 비었습니다.");
-        String email = (account != null) ? account.getEmail() : null;
-
-
-        // 방어적으로 상태 확인 (디버깅에 도움)
-        if (email == null) {
-            Boolean needsAgree = (account != null) ? account.getEmailNeedsAgreement() : null;
-            Boolean hasEmail   = (account != null) ? account.getHasEmail() : null;
-            Boolean valid      = (account != null) ? account.getIsEmailValid() : null;
-            Boolean verified   = (account != null) ? account.getIsEmailVerified() : null;
-
-            // 상황에 맞게 예외 처리/로깅
-            throw new IllegalStateException(
-                    "카카오 이메일을 받지 못했습니다. (scope/동의 확인 필요) " +
-                            "needsAgreement=" + needsAgree + ", hasEmail=" + hasEmail +
-                            ", valid=" + valid + ", verified=" + verified
-            );
-        }
-
-        return email;
+        return me;
     }
 }
 

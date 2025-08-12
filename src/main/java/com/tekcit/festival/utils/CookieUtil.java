@@ -40,4 +40,24 @@ public class CookieUtil {
         return null;
     }
 
+    public ResponseCookie createKakaoSignupCookie(String ticket) {
+        return ResponseCookie.from("kakao_signup", ticket)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(10 * 60)
+                .build();
+    }
+
+    public ResponseCookie deleteKakaoSignupCookie() {
+        return ResponseCookie.from("kakao_signup", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+    }
+
 }

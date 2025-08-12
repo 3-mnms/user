@@ -17,6 +17,7 @@ import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
+import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -52,12 +53,11 @@ public class UserService {
         User user = signupUserDTO.toUserEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
         user.setIsEmailVerified(true);
-        user.setOauthProvider(OAuthProvider.LOCAL);
 
         UserProfileDTO userProfileDTO = signupUserDTO.getUserProfile();
 
         String rNum = userProfileDTO.getResidentNum();
-        UserProfile userProfile = userProfileDTO.toEntity(calcAge(rNum), extractGender(rNum), calcBirth(rNum));
+        UserProfile userProfile = userProfileDTO.toEntity(ResidentUtil.calcAge(rNum), ResidentUtil.extractGender(rNum), ResidentUtil.calcBirth(rNum));
 
         Address address = userProfileDTO.toAddressEntity(userProfile);
         userProfile.getAddresses().add(address);
@@ -74,7 +74,6 @@ public class UserService {
         validateDuplicate(signupUserDTO);
         User user = signupUserDTO.toHostEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
-        user.setOauthProvider(OAuthProvider.LOCAL);
 
         HostProfile hostProfile = signupUserDTO.getHostProfile().toEntity();
 
@@ -140,59 +139,6 @@ public class UserService {
                 .toList();
 
         return BookingProfileDTO.fromEntity(bookingUser, profile, addressDTOS);
-    }
-
-    public int calcAge(String residentNum){
-        if (residentNum == null || !residentNum.contains("-")) {
-            throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
-        }
-
-        String[] rArray = residentNum.split("-");
-        String birth = rArray[0];
-        char gender = rArray[1].charAt(0);
-
-        int year = Integer.parseInt(birth.substring(0, 2));
-
-        switch(gender) {
-            case '1': case '2': case '5': case '6':
-                year += 1900;
-                break;
-            case '3': case '4': case '7': case '8':
-                year += 2000;
-                break;
-            case '9': case '0':
-                year += 1800;
-                break;
-            default:
-                throw new IllegalArgumentException("올바르지 않은 성별 코드입니다.");
-        }
-        int currentYear = LocalDate.now().getYear();
-        return currentYear-year+1;
-    }
-
-    public String calcBirth(String residentNum){
-        if (residentNum == null || !residentNum.contains("-")) {
-            throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
-        }
-
-        String[] rArray = residentNum.split("-");
-        String birth = rArray[0];
-
-        return birth;
-    }
-
-    public UserGender extractGender(String residentNum){
-        char g = residentNum.split("-")[1].charAt(0);
-        UserGender gender = UserGender.MALE;
-
-        if(g == '1' || g == '3'){
-            gender = UserGender.MALE;
-        }
-        else if(g == '2' || g == '4'){
-            gender = UserGender.FEMALE;
-        }
-
-        return gender;
     }
 
     public boolean checkLoginId(String loginId){

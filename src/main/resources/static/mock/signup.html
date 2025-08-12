@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>임시 카카오 가입</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+        .wrap { max-width: 520px; margin: 0 auto; }
+        .row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 12px; }
+        label { font-weight: 600; }
+        input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+        button { padding: 10px 14px; border-radius: 8px; border: 0; background: #111827; color: #fff; cursor: pointer; }
+        pre { background:#0b1020; color:#d1d5db; padding:12px; border-radius:8px; margin-top:16px; overflow:auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h2>임시 카카오 가입</h2>
+    <p>이 페이지는 값 가공 없이 입력값을 그대로 서버로 보냅니다.</p>
+
+    <form id="signupForm">
+        <div class="row">
+            <label for="name">이름</label>
+            <input id="name" name="name" />
+        </div>
+
+        <div class="row">
+            <label for="phone">전화번호</label>
+            <input id="phone" name="phone" placeholder="010-1234-5678 등 자유 입력" />
+        </div>
+
+        <div class="row">
+            <label for="residentNum">주민번호(앞6-뒤1)</label>
+            <input id="residentNum" name="residentNum" placeholder="예: 990101-1" />
+        </div>
+
+        <div class="row">
+            <label for="address">주소</label>
+            <input id="address" name="address" />
+        </div>
+
+        <div class="row">
+            <label for="zipCode">우편번호</label>
+            <input id="zipCode" name="zipCode" />
+        </div>
+
+        <button type="submit">가입</button>
+    </form>
+
+    <pre id="out">결과가 여기에 출력됩니다…</pre>
+</div>
+
+<script>
+    const form = document.getElementById('signupForm');
+    const out  = document.getElementById('out');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        name: form.name.value,             // 가공 없이 그대로
+        phone: form.phone.value,           // 가공 없이 그대로
+        userProfile: {
+          residentNum: form.residentNum.value, // 가공 없이 그대로
+          address: form.address.value,
+          zipCode: form.zipCode.value
+        }
+      };
+
+      try {
+        const res = await fetch('/api/auth/kakao/signupUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // kakao_signup 쿠키 동봉
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        out.textContent = res.ok ? ('가입 성공 🎉\n' + text) : ('가입 실패(' + res.status + ')\n' + text);
+      } catch (err) {
+        out.textContent = '네트워크 오류: ' + (err?.message || err);
+      }
+    });
+</script>
+</body>
+</html>
