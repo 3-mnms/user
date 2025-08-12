@@ -66,5 +66,15 @@ public class SignupUserDTO {
                 .build();
     }
 
+    public User toAdminEntity(){
+        return User.builder()
+                .loginId(loginId)
+                .loginPw(loginPw)
+                .name(name)
+                .phone(phone)
+                .email(email)
+                .role(UserRole.ADMIN)
+                .build();
+    }
 
 }

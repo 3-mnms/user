@@ -33,7 +33,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "회원 가입 실패 (잘못된 데이터, 필수 필드 누락)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Phone, Email로 인한 conflict)",
+            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<UserResponseDTO> signupUser(@Valid @RequestBody SignupUserDTO signupUserDTO){
@@ -49,12 +49,28 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Phone, Email로 인한 conflict)",
+            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<UserResponseDTO> signupHost(@Valid @RequestBody SignupUserDTO signupUserDTO){
         UserResponseDTO signupHost = userService.signupHost(signupUserDTO);
         return ResponseEntity.ok(signupHost);
+    }
+
+    @PostMapping(value="/signupAdmin")
+    @Operation(summary = "회원 가입(운영 관리자)",
+            description = "운영 관리자 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupAdmin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 가입 성공(운영 관리자)",
+                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<UserResponseDTO> signupAdmin(@Valid @RequestBody SignupUserDTO signupUserDTO){
+        UserResponseDTO signupAdmin = userService.signupAdmin(signupUserDTO);
+        return ResponseEntity.ok(signupAdmin);
     }
 
     @PatchMapping(value="/{userId}/state")

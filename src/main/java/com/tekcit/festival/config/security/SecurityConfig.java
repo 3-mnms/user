@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/signupUser",
                                 "/api/users/signupHost",
+                                "/api/users/signupAdmin",
                                 "/api/users/login",
                                 "/api/users/reissue",
                                 "/api/users/checkLoginId",
