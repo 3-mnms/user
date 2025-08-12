@@ -32,7 +32,7 @@ public class JwtTokenProvider {
     @Value("${jwt.public-pem-path}")
     private org.springframework.core.io.Resource publicPemPath;
 
-    @Value("${jwt.access-valid-ms:1800000}")
+    @Value("${jwt.access-valid-ms:180000000000000}")
     private long accessValidMs;
 
     @Value("${jwt.refresh-valid-ms:1296000000}")

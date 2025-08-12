@@ -86,6 +86,17 @@ public class UserService {
     }
 
     @Transactional
+    public UserResponseDTO signupAdmin(SignupUserDTO signupUserDTO){
+        validateDuplicate(signupUserDTO);
+        User user = signupUserDTO.toAdminEntity();
+        user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
+        user.setOauthProvider(OAuthProvider.LOCAL);
+
+        userRepository.save(user);
+        return UserResponseDTO.fromEntity(user);
+    }
+
+    @Transactional
     public void changeState(Long userId, boolean active, Authentication authentication){
         CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
         User adminUser = currentUser.getUser();
@@ -191,6 +202,7 @@ public class UserService {
     public boolean checkEmail(String email){
         return !userRepository.existsByEmail(email);
     }
+
     public void validateDuplicate(SignupUserDTO signupUserDTO){
         if(userRepository.existsByLoginId(signupUserDTO.getLoginId()))
             throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, signupUserDTO.getLoginId());
