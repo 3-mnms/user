@@ -73,12 +73,14 @@ public class KakaoAuthController {
     /** 카카오 콜백: 신규면 티켓 쿠키 SET 후 가입 폼으로, 기존이면 쿠키 삭제 후 로그인으로 */
     @GetMapping("/callback")
     public void callback(@RequestParam("code") String code, HttpServletResponse response) throws IOException{
-        Optional<String> result = kakaoService.handleCallback(code);
-        if (result.isPresent()) {
-            response.addHeader("Set-Cookie", cookieUtil.createKakaoSignupCookie(result.get()).toString());
+        KakaoService.KakaoCallbackResult result = kakaoService.handleCallback(code);
+        if (result.isNew()) {
+            response.addHeader("Set-Cookie", cookieUtil.createKakaoSignupCookie(result.signupTicket()).toString());
             response.sendRedirect(frontendSignupUrl + "?provider=kakao");
+            return;
         }
         else {
+            kakaoService.login(result.kakaoId(), response);
             response.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
             response.sendRedirect(frontendLoginUrl);
         }
