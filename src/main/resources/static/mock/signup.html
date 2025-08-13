@@ -5,64 +5,99 @@
     <title>임시 카카오 가입</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
-        .wrap { max-width: 520px; margin: 0 auto; }
-        .row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 12px; }
+        :root { --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --bg:#ffffff; --ok:#10b981; --err:#ef4444; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; color: var(--fg); background: var(--bg); }
+        .wrap { max-width: 560px; margin: 0 auto; }
+        .card { border:1px solid var(--line); border-radius: 12px; padding: 18px; }
+        h1 { font-size: 20px; margin: 0 0 12px; }
+        .muted { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+        .row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 12px; align-items: center; }
         label { font-weight: 600; }
-        input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
-        button { padding: 10px 14px; border-radius: 8px; border: 0; background: #111827; color: #fff; cursor: pointer; }
-        pre { background:#0b1020; color:#d1d5db; padding:12px; border-radius:8px; margin-top:16px; overflow:auto; }
+        input { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; width: 100%; }
+        button { padding: 10px 14px; border-radius: 8px; border: 0; background: var(--fg); color: #fff; cursor: pointer; }
+        button[disabled] { opacity:.6; cursor:not-allowed; }
+        .links { display:flex; gap:8px; margin-top:10px;}
+        .links a { font-size:14px; color:#2563eb; text-decoration:none; }
+        .links a:hover { text-decoration:underline; }
+        .alert { border-radius:8px; padding:10px 12px; font-size:14px; margin-bottom:12px; display:none; }
+        .alert.ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+        .alert.err { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+        pre { background:#0b1020; color:#d1d5db; padding:12px; border-radius:8px; margin-top:16px; overflow:auto; font-size:12px; }
     </style>
 </head>
 <body>
 <div class="wrap">
-    <h2>임시 카카오 가입</h2>
-    <p>이 페이지는 값 가공 없이 입력값을 그대로 서버로 보냅니다.</p>
+    <div class="card">
+        <h1>카카오 신규 회원가입</h1>
+        <p class="muted">
+            이 폼은 가공 없이 입력값을 그대로 서버로 보냅니다.
+            <br>요청 시 <code>kakao_signup</code> 쿠키가 자동으로 함께 전송되어야 합니다(백엔드에서 HttpOnly로 세팅됨).
+        </p>
 
-    <form id="signupForm">
-        <div class="row">
-            <label for="name">이름</label>
-            <input id="name" name="name" />
+        <div id="alert-ok"  class="alert ok"></div>
+        <div id="alert-err" class="alert err"></div>
+
+        <form id="signupForm">
+            <div class="row">
+                <label for="name">이름</label>
+                <input id="name" name="name" autocomplete="name" required />
+            </div>
+
+            <div class="row">
+                <label for="phone">전화번호</label>
+                <input id="phone" name="phone" placeholder="010-1234-5678" autocomplete="tel" required />
+            </div>
+
+            <div class="row">
+                <label for="residentNum">주민번호(앞6-뒤1)</label>
+                <input id="residentNum" name="residentNum" placeholder="예: 990101-1" required />
+            </div>
+
+            <div class="row">
+                <label for="address">주소</label>
+                <input id="address" name="address" required />
+            </div>
+
+            <div class="row">
+                <label for="zipCode">우편번호</label>
+                <input id="zipCode" name="zipCode" required />
+            </div>
+
+            <button id="btnSubmit" type="submit">가입</button>
+        </form>
+
+        <div class="links">
+            <a href="/api/auth/kakao/authorize">카카오 재인증</a>
+            <a href="/api/auth/kakao/authorize?force=true">카카오 재인증(계정선택 강제)</a>
+            <a href="/login.html">로그인 페이지로</a>
         </div>
 
-        <div class="row">
-            <label for="phone">전화번호</label>
-            <input id="phone" name="phone" placeholder="010-1234-5678 등 자유 입력" />
-        </div>
-
-        <div class="row">
-            <label for="residentNum">주민번호(앞6-뒤1)</label>
-            <input id="residentNum" name="residentNum" placeholder="예: 990101-1" />
-        </div>
-
-        <div class="row">
-            <label for="address">주소</label>
-            <input id="address" name="address" />
-        </div>
-
-        <div class="row">
-            <label for="zipCode">우편번호</label>
-            <input id="zipCode" name="zipCode" />
-        </div>
-
-        <button type="submit">가입</button>
-    </form>
-
-    <pre id="out">결과가 여기에 출력됩니다…</pre>
+        <pre id="out">응답이 여기에 출력됩니다…</pre>
+    </div>
 </div>
 
 <script>
-    const form = document.getElementById('signupForm');
-    const out  = document.getElementById('out');
+    const $ = (id) => document.getElementById(id);
+    const form = $("signupForm");
+    const out  = $("out");
+    const ok   = $("alert-ok");
+    const err  = $("alert-err");
+    const btn  = $("btnSubmit");
+
+    function show(el, msg) { el.textContent = msg; el.style.display = "block"; }
+    function hide(el){ el.style.display = "none"; }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hide(ok); hide(err);
+      btn.disabled = true;
 
       const payload = {
-        name: form.name.value,             // 가공 없이 그대로
-        phone: form.phone.value,           // 가공 없이 그대로
+        name: form.name.value,
+        phone: form.phone.value,
         userProfile: {
-          residentNum: form.residentNum.value, // 가공 없이 그대로
+          residentNum: form.residentNum.value,
           address: form.address.value,
           zipCode: form.zipCode.value
         }
@@ -76,12 +111,25 @@
           body: JSON.stringify(payload)
         });
 
-        const text = await res.text();
-        out.textContent = res.ok ? ('가입 성공 🎉\n' + text) : ('가입 실패(' + res.status + ')\n' + text);
-      } catch (err) {
-        out.textContent = '네트워크 오류: ' + (err?.message || err);
+        const contentType = res.headers.get('content-type') || '';
+        const body = contentType.includes('application/json') ? await res.json() : await res.text();
+
+        if (res.ok) {
+          show(ok, '가입 성공 🎉 이제 로그인 페이지로 이동할 수 있어요.');
+        } else {
+          const msg = typeof body === 'string' ? body : (body.message || JSON.stringify(body, null, 2));
+          show(err, `가입 실패 (${res.status}) - ${msg}`);
+        }
+        out.textContent = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+      } catch (ex) {
+        show(err, '네트워크 오류: ' + (ex?.message || ex));
+        out.textContent = (ex?.stack || ex);
+      } finally {
+        btn.disabled = false;
       }
     });
+
+    // 참고: HttpOnly 쿠키는 JS로 읽을 수 없으니 여기서 확인 불가. 필요 시 서버 응답으로 판단하세요.
 </script>
 </body>
 </html>
