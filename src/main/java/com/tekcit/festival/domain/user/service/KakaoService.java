@@ -27,16 +27,13 @@ public class KakaoService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public Result handleCallback(String code) {
+    public Optional<String> handleCallback(String code) {
         String accessToken = kakaoOAuthService.exchangeCodeForAccessToken(code);
         KakaoMeResponse me = kakaoOAuthService.fetchMe(accessToken);
 
         KakaoMeResponse.KakaoAccount account = Optional.ofNullable(me)
                 .map(KakaoMeResponse::getKakaoAccount)
-                .orElse(null);
-
-        if(account == null)
-            throw new IllegalStateException("카카오 계정 정보가 비었습니다.");
+                .orElseThrow(()-> new IllegalStateException("카카오 계정 정보가 비었습니다."));
 
         String email = account.getEmail();
         Boolean needs = account.getEmailNeedsAgreement();
@@ -59,16 +56,16 @@ public class KakaoService {
                 .isPresent();
 
         if (exists)
-            return Result.existing();
+            return Optional.empty(); //기존 가입자
 
-        String signupTicket = jwtTokenProvider.createSignupTicket(kakaoId, email);
-        return Result.needSignup(signupTicket);
+        String signupTicket = jwtTokenProvider.createSignupTicket(kakaoId, email); //신규 가입자
+        return Optional.of(signupTicket);
     }
 
     @Transactional
     public UserResponseDTO signupUser(KakaoSignupDTO kakaoSignupDTO, String signupTicket) {
         if (signupTicket == null)
-            throw new IllegalStateException("카카오 가입 토큰이 없습니다. 다시 인증해주세요.");
+            throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "카카오 가입 토큰이 없습니다. 다시 인증해주세요.");
 
         JwtTokenProvider.SignupTicketClaims claims = jwtTokenProvider.parseSignupTicket(signupTicket);
         String kakaoId = claims.kakaoId();
@@ -95,10 +92,5 @@ public class KakaoService {
 
         userRepository.save(kakaoUser);
         return UserResponseDTO.fromEntity(kakaoUser);
-    }
-
-    public record Result(boolean existingUser, String signupTicket) {
-        public static Result existing() { return new Result(true, null); }
-        public static Result needSignup(String ticket) { return new Result(false, ticket); }
     }
 }

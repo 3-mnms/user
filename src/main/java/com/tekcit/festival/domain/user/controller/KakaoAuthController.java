@@ -1,11 +1,10 @@
 package com.tekcit.festival.domain.user.controller;
 
 import com.tekcit.festival.domain.user.dto.request.KakaoSignupDTO;
-import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
-import com.tekcit.festival.domain.user.dto.response.KakaoMeResponse;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.KakaoService;
-import com.tekcit.festival.domain.user.service.KakaoOAuthService;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.exception.global.ErrorResponse;
 import com.tekcit.festival.utils.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth/kakao")
@@ -54,29 +54,34 @@ public class KakaoAuthController {
     private final KakaoService kakaoService;
     private final CookieUtil cookieUtil;
 
+    /** 카카오 인가 시작 (force=true면 로그인 화면 강제 노출) */
     @GetMapping("/authorize")
-    public void redirectToKakao(HttpServletResponse response) throws IOException {
+    public void redirectToKakao(@RequestParam(value = "force", defaultValue = "false") boolean forceLogin, HttpServletResponse response) throws IOException {
 
-        String url = UriComponentsBuilder.fromHttpUrl(authorizeUri)
+        UriComponentsBuilder u = UriComponentsBuilder.fromHttpUrl(authorizeUri)
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
-                .queryParam("scope", scope)
-                .toUriString();
+                .queryParam("scope", scope);
 
-        response.sendRedirect(url); // 브라우저를 카카오로 리다이렉트
+        if (forceLogin){
+            u.queryParam("prompt", "login"); // 무조건 카카오 로그인창
+        }
+        response.sendRedirect(u.toUriString()); // 브라우저를 카카오로 리다이렉트
     }
 
+    /** 카카오 콜백: 신규면 티켓 쿠키 SET 후 가입 폼으로, 기존이면 쿠키 삭제 후 로그인으로 */
     @GetMapping("/callback")
     public void callback(@RequestParam("code") String code, HttpServletResponse response) throws IOException{
-        // 1) code -> access_token
-        KakaoService.Result result = kakaoService.handleCallback(code);
-        if (!result.existingUser()) {
-            response.addHeader("Set-Cookie", cookieUtil.createKakaoSignupCookie(result.signupTicket()).toString());
+        Optional<String> result = kakaoService.handleCallback(code);
+        if (result.isPresent()) {
+            response.addHeader("Set-Cookie", cookieUtil.createKakaoSignupCookie(result.get()).toString());
             response.sendRedirect(frontendSignupUrl + "?provider=kakao");
-            return;
         }
-        response.sendRedirect(frontendLoginUrl);
+        else {
+            response.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
+            response.sendRedirect(frontendLoginUrl);
+        }
     }
 
     @PostMapping(value="/signupUser")
@@ -92,11 +97,18 @@ public class KakaoAuthController {
     })
     public ResponseEntity<UserResponseDTO> signupUser(@Valid @RequestBody KakaoSignupDTO kakaoSignupDTO,
                                                       @CookieValue(value = "kakao_signup", required = false) String ticket,
-                                                      HttpServletResponse res){
-        UserResponseDTO signupUser = kakaoService.signupUser(kakaoSignupDTO, ticket);
-        res.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
+                                                      HttpServletResponse res) {
+        try {
+            UserResponseDTO signupUser = kakaoService.signupUser(kakaoSignupDTO, ticket);
+            res.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
+            return ResponseEntity.ok(signupUser);
 
-        return ResponseEntity.ok(signupUser);
+        } catch (BusinessException ex) {
+            if (ex.getErrorCode() == ErrorCode.KAKAO_INVALID_TICKET) {
+                res.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
+            }
+            throw ex;
+        }
     }
 }
 
