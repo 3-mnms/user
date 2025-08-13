@@ -1,19 +1,32 @@
 package com.tekcit.festival.domain.user.service;
 
+import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.domain.user.dto.request.KakaoSignupDTO;
+import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.KakaoMeResponse;
+import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
+import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
+import com.tekcit.festival.utils.CookieUtil;
 import com.tekcit.festival.utils.ResidentUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +36,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class KakaoService {
+    private final AuthenticationManager authenticationManager;
     private final KakaoOAuthService kakaoOAuthService;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CookieUtil cookieUtil;
 
-    public Optional<String> handleCallback(String code) {
+    public KakaoCallbackResult handleCallback(String code) {
         String accessToken = kakaoOAuthService.exchangeCodeForAccessToken(code);
         KakaoMeResponse me = kakaoOAuthService.fetchMe(accessToken);
 
@@ -56,10 +71,10 @@ public class KakaoService {
                 .isPresent();
 
         if (exists)
-            return Optional.empty(); //기존 가입자
+            return new KakaoCallbackResult(false, null, kakaoId); //기존 가입자
 
         String signupTicket = jwtTokenProvider.createSignupTicket(kakaoId, email); //신규 가입자
-        return Optional.of(signupTicket);
+        return new KakaoCallbackResult(true, signupTicket, kakaoId);
     }
 
     @Transactional
@@ -93,4 +108,25 @@ public class KakaoService {
         userRepository.save(kakaoUser);
         return UserResponseDTO.fromEntity(kakaoUser);
     }
+
+    @Transactional
+    public void login(String kakaoId, HttpServletResponse response) {
+        User user = userRepository.findByOauthProviderAndOauthProviderId(OAuthProvider.KAKAO, kakaoId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole().equals(UserRole.USER) && !user.getUserProfile().isActive()) {
+            throw new BusinessException(ErrorCode.USER_DEACTIVATED);
+        }
+
+        String refreshToken = jwtTokenProvider.createRefreshToken(user);
+
+        user.updateRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        ResponseCookie cookie = cookieUtil.createRefreshTokenCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    public record KakaoCallbackResult(boolean isNew, String signupTicket, String kakaoId) {}
+
 }
