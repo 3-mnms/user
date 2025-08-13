@@ -79,17 +79,17 @@ public class User extends BaseEntity {
         switch (oauthProvider) {
             case LOCAL -> {
                 if ((loginId == null || loginId.isBlank()) || (loginPw == null || loginPw.isBlank()))
-                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "LOCAL 계정은 loginId/loginPw가 필수입니다.");
+                    throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "LOCAL 계정은 loginId/loginPw가 필수입니다.");
                 if (oauthProviderId != null)
-                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "LOCAL 계정은 oauthProviderId가 null이어야 합니다.");
+                    throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "LOCAL 계정은 oauthProviderId가 null이어야 합니다.");
             }
             case KAKAO -> {
                 if (loginId != null || loginPw != null)
-                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "KAKAO 계정은 loginId/loginPw가 null이어야 합니다.");
+                    throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "KAKAO 계정은 loginId/loginPw가 null이어야 합니다.");
                 if ((oauthProviderId == null || oauthProviderId.isBlank()))
-                    throw new BusinessException(ErrorCode.INVALID_FIELDS, "KAKAO 계정은 oauthProviderId가 필수입니다.");
+                    throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "KAKAO 계정은 oauthProviderId가 필수입니다.");
             }
-            default -> throw new BusinessException(ErrorCode.INVALID_FIELDS, "지원하지 않는 oauthProvider: " + oauthProvider);
+            default -> throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "지원하지 않는 oauthProvider: " + oauthProvider);
         }
     }
 }

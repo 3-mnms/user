@@ -8,7 +8,6 @@ import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.entity.*;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
-import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
 import com.tekcit.festival.domain.user.repository.AddressRepository;
@@ -25,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -44,7 +42,7 @@ public class UserService {
 
         EmailVerification emailVerification =
                 emailVerificationRepository.findByEmailAndType(signupUserDTO.getEmail(), VerificationType.SIGNUP)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_NOT_FOUND));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND));
 
         if(!emailVerification.getIsVerified()){
             throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
