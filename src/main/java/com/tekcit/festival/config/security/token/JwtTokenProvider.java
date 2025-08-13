@@ -43,7 +43,7 @@ public class JwtTokenProvider {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    @Value("${signup.ticket.valid-ms:600000}") // 기본 10분
+    @Value("${signup.ticket.valid-ms}") // 기본 10분
     private long signupTicketValidMs;
 
     private PrivateKey privateKey;
@@ -177,19 +177,22 @@ public class JwtTokenProvider {
 
 
             if (!"kakao-signup".equals(c.getSubject())) {
-                throw new BusinessException(ErrorCode.INVALID_TICKET, "잘못된 가입 티켓(subject mismatch) 입니다.");
+                throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "잘못된 가입 티켓(subject mismatch) 입니다.");
             }
 
-            String kid = c.get("kid", String.class);
+            String kid = c.get("kakaoId", String.class);
             String email = c.get("email", String.class);
 
             if (kid == null || kid.isBlank() || email == null || email.isBlank()) {
-                throw new BusinessException(ErrorCode.INVALID_TICKET, "카카오 id 또는 카카오 이메일이 올바르지 못합니다.");
+                throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "카카오 id 또는 카카오 이메일이 올바르지 못합니다.");
             }
             return new SignupTicketClaims(kid, email);
 
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            throw new BusinessException(ErrorCode.INVALID_TICKET, "가입 티켓이 만료되었습니다.");
+            throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 만료되었습니다.");
+        } catch (JwtException | IllegalArgumentException e) {
+            // 서명 오류, 위조, 포맷 오류 등 모두 여기로
+            throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 유효하지 않습니다.");
         }
     }
 
