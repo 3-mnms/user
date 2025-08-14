@@ -6,6 +6,8 @@ import com.tekcit.festival.domain.user.service.KakaoService;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.exception.global.ErrorResponse;
+import com.tekcit.festival.exception.global.SuccessResponse;
+import com.tekcit.festival.utils.ApiResponseUtil;
 import com.tekcit.festival.utils.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -97,13 +99,13 @@ public class KakaoAuthController {
             @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<UserResponseDTO> signupUser(@Valid @RequestBody KakaoSignupDTO kakaoSignupDTO,
-                                                      @CookieValue(value = "kakao_signup", required = false) String ticket,
-                                                      HttpServletResponse res) {
+    public ResponseEntity<SuccessResponse<UserResponseDTO>> signupUser(@Valid @RequestBody KakaoSignupDTO kakaoSignupDTO,
+                                                                      @CookieValue(value = "kakao_signup", required = false) String ticket,
+                                                                      HttpServletResponse res) {
         try {
             UserResponseDTO signupUser = kakaoService.signupUser(kakaoSignupDTO, ticket);
             res.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
-            return ResponseEntity.ok(signupUser);
+            return ApiResponseUtil.success(signupUser);
 
         } catch (BusinessException ex) {
             if (ex.getErrorCode() == ErrorCode.KAKAO_INVALID_TICKET) {

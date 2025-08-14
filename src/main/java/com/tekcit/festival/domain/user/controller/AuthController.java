@@ -4,6 +4,8 @@ import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.service.AuthService;
+import com.tekcit.festival.exception.global.SuccessResponse;
+import com.tekcit.festival.utils.ApiResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,19 +39,19 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "로그인 실패 (사용자를 찾을 수 없음)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<SuccessResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         LoginResponseDTO loginResult = authService.login(request, response);
-        return ResponseEntity.ok(loginResult);
+        return ApiResponseUtil.success(loginResult);
     }
 
     @PostMapping("/logout")
     @Operation(summary = "로그아웃",
             description = "로그아웃 기능 ex) POST /api/users/logout")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "로그아웃 성공")})
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공",
+            content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
+    public ResponseEntity<SuccessResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logout(request, response);
-        return ResponseEntity.noContent().build();
+        return ApiResponseUtil.success(null, "로그아웃 성공");
     }
 
     @PostMapping("/reissue")
@@ -63,16 +65,16 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "로그인 실패 (사용자를 찾을 수 없음)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<LoginResponseDTO> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<SuccessResponse<LoginResponseDTO>> reissue(HttpServletRequest request, HttpServletResponse response) {
         LoginResponseDTO newToken = authService.reissue(request, response);
-        return ResponseEntity.ok(newToken);
+        return ApiResponseUtil.success(newToken);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getMyInfo(Authentication authentication) {
+    public ResponseEntity<SuccessResponse<String>> getMyInfo(Authentication authentication) {
             // SecurityContext에서 로그인한 사용자 정보 확인
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return ResponseEntity.ok("Hello, " + userDetails.getUsername());
+        return ApiResponseUtil.success("Hello, " + userDetails.getUsername());
     }
 
 }
