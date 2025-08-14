@@ -75,8 +75,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setIssuer(issuer)
-                .setSubject(user.getLoginId())
-                .claim("userId", user.getUserId())
+                .setSubject(String.valueOf(user.getUserId()))
                 .claim("role", user.getRole().name())
                 .claim("name", user.getName())
                 .setIssuedAt(now)
@@ -93,7 +92,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setIssuer(issuer)
-                .setSubject(user.getLoginId())
+                .setSubject(String.valueOf(user.getUserId()))
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .serializeToJsonWith(jsonSerializer) // ★ 여기!
@@ -139,17 +138,18 @@ public class JwtTokenProvider {
         return false;
     }
 
-    public String getLoginId(String token) {
+    public Long getUserId(String token) {
         try {
-            return Jwts.parserBuilder()
+            String sub = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .setAllowedClockSkewSeconds(30)  // 시계 오차 30초 허용
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
-                    .getSubject(); // loginId
+                    .getSubject(); // userId=> String
+            return Long.parseLong(sub);
         } catch (ExpiredJwtException e) {
-            return e.getClaims().getSubject();
+            return Long.parseLong(e.getClaims().getSubject());
         } catch (Exception e) {
             return null;
         }
@@ -190,8 +190,7 @@ public class JwtTokenProvider {
 
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
             throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 만료되었습니다.");
-        } catch (JwtException | IllegalArgumentException e) {
-            // 서명 오류, 위조, 포맷 오류 등 모두 여기로
+        } catch (JwtException | IllegalArgumentException e) { // 서명 오류, 위조, 포맷 오류 등
             throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 유효하지 않습니다.");
         }
     }
