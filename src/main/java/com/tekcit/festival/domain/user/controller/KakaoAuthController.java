@@ -93,7 +93,7 @@ public class KakaoAuthController {
             description = "일반 유저 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/auth/kakao/signupUser")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(일반 유저)",
-                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
             @ApiResponse(responseCode = "400", description = "회원 가입 실패 (잘못된 데이터, 필수 필드 누락)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",

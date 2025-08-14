@@ -48,7 +48,7 @@ public class UserController {
             description = "축제 주최측 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupHost")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(축제 주최측)",
-                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
             @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
@@ -64,7 +64,7 @@ public class UserController {
             description = "운영 관리자 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupAdmin")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(운영 관리자)",
-                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
             @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",

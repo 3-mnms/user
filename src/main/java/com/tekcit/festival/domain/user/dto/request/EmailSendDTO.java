@@ -1,8 +1,6 @@
 package com.tekcit.festival.domain.user.dto.request;
 
 import com.tekcit.festival.domain.user.entity.EmailVerification;
-import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
