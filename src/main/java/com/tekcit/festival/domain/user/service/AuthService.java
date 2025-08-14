@@ -76,12 +76,12 @@ public class AuthService {
         ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        if (loginId == null)
+        if (userId == null)
             return;
 
-        userRepository.findByLoginId(loginId).ifPresent(user -> {
+        userRepository.findById(userId).ifPresent(user -> {
             user.updateRefreshToken(null);
             userRepository.save(user);
         });
@@ -97,11 +97,11 @@ public class AuthService {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
         }
 
-        //refreshToken에서 loginId 정보 get
-        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+        //refreshToken에서 userId 정보 get
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        //loginId로 user조회
-        User user = userRepository.findByLoginId(loginId)
+        //userId로 user조회
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         checkState(user);
