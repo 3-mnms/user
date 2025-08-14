@@ -51,7 +51,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 사용 시
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/_debug/**",
                                 "/api/users/signupUser",
                                 "/api/users/signupHost",
                                 "/api/users/signupAdmin",
@@ -59,6 +58,7 @@ public class SecurityConfig {
                                 "/api/users/reissue",
                                 "/api/users/checkLoginId",
                                 "/api/users/checkEmail",
+                                "/api/users/token/parse",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/mail/**",
