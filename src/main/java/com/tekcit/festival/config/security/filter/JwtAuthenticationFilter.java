@@ -2,6 +2,7 @@ package com.tekcit.festival.config.security.filter;
 
 import com.tekcit.festival.config.security.service.CustomUserDetailsService;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
+import com.tekcit.festival.utils.TokenParseUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,17 +20,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
-    private String resolveToken(HttpServletRequest request){
-        String bearer = request.getHeader("Authorization");
-        if(bearer != null && bearer.startsWith("Bearer ")){
-            return bearer.substring(7);
-        }
-        return null;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = resolveToken(request);
+        String token = TokenParseUtil.parseToken(request);
+
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Long userId = jwtTokenProvider.getUserId(token);
             UserDetails userDetails = userDetailsService.loadUserByUserId(userId);

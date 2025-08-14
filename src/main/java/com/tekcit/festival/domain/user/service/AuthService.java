@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.CustomUserDetails;
+import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
@@ -9,6 +10,7 @@ import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.utils.CookieUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.tekcit.festival.exception.ErrorCode;
+
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -115,6 +119,27 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(user);
 
         return LoginResponseDTO.fromToken(newAccessToken);
+    }
+
+    public AccessTokenInfoDTO parseAccessToken(Claims claims){
+        Long userId = Long.valueOf(claims.getSubject());
+        String role = claims.get("role", String.class);
+        String name = claims.get("name", String.class);
+
+        Date issuedAt = claims.getIssuedAt();
+        Date expiresAt = claims.getExpiration();
+
+        long nowMs = System.currentTimeMillis();
+        boolean isExpired = (expiresAt != null) && (expiresAt.getTime() <= nowMs);
+
+        return AccessTokenInfoDTO.builder()
+                .userId(userId)
+                .role(role)
+                .name(name)
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
+                .isExpired(isExpired)
+                .build();
     }
 
     public void checkState(User user){
