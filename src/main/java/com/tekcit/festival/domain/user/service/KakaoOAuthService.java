@@ -29,6 +29,9 @@ public class KakaoOAuthService {
     @Value("${kakao.userinfo-uri}")
     private String userinfoUri;
 
+    @Value("${kakao.admin-key}")
+    private String adminKey;
+
     private final WebClient webClient = WebClient.builder().build();
 
     public String exchangeCodeForAccessToken(String code){
@@ -66,6 +69,18 @@ public class KakaoOAuthService {
             throw new IllegalStateException("카카오 사용자 정보 조회 실패");
 
         return me;
+    }
+
+    public void unlinkByAdmin(String kakaoUserId) {
+        webClient.post()
+                .uri("https://kapi.kakao.com/v1/user/unlink")
+                .header(HttpHeaders.AUTHORIZATION, "KakaoAK " + adminKey)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("target_id_type", "user_id")
+                        .with("target_id", kakaoUserId))
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 }
 

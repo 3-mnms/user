@@ -1,6 +1,5 @@
-package com.tekcit.festival.config.security.service;
+package com.tekcit.festival.config.security.userdetails;
 
-import com.tekcit.festival.config.security.CustomUserDetails;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

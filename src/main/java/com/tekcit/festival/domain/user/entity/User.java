@@ -60,10 +60,10 @@ public class User extends BaseEntity {
     @Column(name = "oauth_provider_id", length = 100)
     private String oauthProviderId; // 예: 카카오 id(문자열)
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserProfile userProfile;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private HostProfile hostProfile;
 
     public void updateRefreshToken(String refreshToken) {

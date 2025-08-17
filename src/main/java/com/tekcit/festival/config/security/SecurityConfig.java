@@ -1,7 +1,7 @@
 package com.tekcit.festival.config.security;
 
 import com.tekcit.festival.config.security.filter.JwtAuthenticationFilter;
-import com.tekcit.festival.config.security.service.CustomUserDetailsService;
+import com.tekcit.festival.config.security.userdetails.CustomUserDetailsService;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

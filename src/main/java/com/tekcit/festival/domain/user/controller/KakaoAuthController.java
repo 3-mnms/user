@@ -18,7 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -114,5 +117,16 @@ public class KakaoAuthController {
             throw ex;
         }
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteKakaoUser(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+        kakaoService.deleteKakaoUser(userId);
+        ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
+
 }
 
