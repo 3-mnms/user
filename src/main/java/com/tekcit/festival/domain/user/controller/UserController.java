@@ -6,6 +6,7 @@ import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.UserService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
+import com.tekcit.festival.utils.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,9 +15,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import com.tekcit.festival.exception.global.ErrorResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final CookieUtil cookieUtil;
 
     @PostMapping(value="/signupUser")
     @Operation(summary = "회원 가입(일반 유저)",
@@ -110,5 +115,15 @@ public class UserController {
     public ResponseEntity<SuccessResponse<BookingProfileDTO>> bookingProfile(@Valid @PathVariable Long userId){
         BookingProfileDTO bookingProfile = userService.bookingProfile(userId);
         return ApiResponseUtil.success(bookingProfile);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+        userService.deleteUser(userId);
+        ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 }

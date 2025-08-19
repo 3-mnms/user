@@ -1,6 +1,6 @@
 package com.tekcit.festival.domain.user.service;
 
-import com.tekcit.festival.config.security.CustomUserDetails;
+import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
@@ -16,6 +16,7 @@ import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
+import com.tekcit.festival.utils.CookieUtil;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class UserService {
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final CookieUtil cookieUtil;
 
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
@@ -139,6 +141,17 @@ public class UserService {
         return BookingProfileDTO.fromEntity(bookingUser, profile, addressDTOS);
     }
 
+    @Transactional
+    public void deleteUser(Long userId){
+        User deleteUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (deleteUser.getRole() != UserRole.USER) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        userRepository.delete(deleteUser);
+    }
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
     }

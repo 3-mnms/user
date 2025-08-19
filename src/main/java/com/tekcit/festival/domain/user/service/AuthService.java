@@ -1,6 +1,6 @@
 package com.tekcit.festival.domain.user.service;
 
-import com.tekcit.festival.config.security.CustomUserDetails;
+import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;

@@ -1,6 +1,6 @@
 package com.tekcit.festival.config.security.filter;
 
-import com.tekcit.festival.config.security.service.CustomUserDetailsService;
+import com.tekcit.festival.config.security.userdetails.CustomUserDetailsService;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.utils.TokenParseUtil;
 import jakarta.servlet.*;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
