@@ -1,5 +1,8 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
+import com.tekcit.festival.domain.user.dto.request.FindPwEmailDTO;
+import com.tekcit.festival.domain.user.dto.request.FindPwResetDTO;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
@@ -126,4 +129,41 @@ public class UserController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
     }
+
+    @PostMapping(value="/findLoginId")
+    @Operation(summary = "아이디 찾기",
+            description = "로그인 아이디 찾기, FindLoginIdDTO를 포함해야 합니다. ex) POST /api/users/findLoginId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "아이디 찾기 성공",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<String>> findLoginId(@Valid @RequestBody FindLoginIdDTO findLoginIdDTO){
+        String loginId = userService.findLoginId(findLoginIdDTO);
+        return ApiResponseUtil.success(loginId);
+    }
+
+    @PostMapping(value="/findRegisteredEmail")
+    @Operation(summary = "비밀번호 찾기",
+            description = "로그인 비밀번호 찾기 1단계, FindLoginPwDTO(로그인아이디, 이름)을 포함해야 합니다. ex) POST /api/users/findRegisteredEmail")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "인증 성공 이메일 주소 return",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<String>> findRegisteredEmail(@Valid @RequestBody FindPwEmailDTO findPwEmailDTO){
+        String email = userService.findRegisteredEmail(findPwEmailDTO);
+        return ApiResponseUtil.success(email);
+    }
+
+    @PostMapping(value="/resetPasswordWithEmail")
+    @Operation(summary = "비밀번호 재설정",
+            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) POST /api/users/resetPasswordWithEmail")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 후 새로운 비밀번호 재설정",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<Void>> resetPasswordWithEmail(@Valid @RequestBody FindPwResetDTO findPwResetDTO){
+        userService.resetPasswordWithEmail(findPwResetDTO);
+        return ApiResponseUtil.success();
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
-import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
-import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
+import com.tekcit.festival.domain.user.dto.request.*;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
@@ -124,7 +123,6 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
     }
 
-    @Transactional(readOnly = true)
     public BookingProfileDTO bookingProfile(Long userId) {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -152,6 +150,52 @@ public class UserService {
 
         userRepository.delete(deleteUser);
     }
+
+    public String findLoginId(FindLoginIdDTO findLoginIdDTO){
+        String name  = findLoginIdDTO.getName();
+        String email = findLoginIdDTO.getEmail();
+
+        User findUser = userRepository.findByNameAndEmail(name, email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return findUser.getLoginId();
+    }
+
+    public String findRegisteredEmail(FindPwEmailDTO findPwEmailDTO){
+        String loginId = findPwEmailDTO.getLoginId();
+        String name  = findPwEmailDTO.getName();
+
+        User findUser = userRepository.findByLoginIdAndName(loginId, name)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return findUser.getEmail();
+    }
+
+    @Transactional
+    public void resetPasswordWithEmail(FindPwResetDTO findPwResetDTO){
+        User findUser = userRepository.findByLoginId(findPwResetDTO.getLoginId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if(!findUser.getEmail().equals(findPwResetDTO.getEmail()))
+            throw new BusinessException(ErrorCode.USER_EMAIL_NOT_MATCH);
+
+        EmailVerification emailVerification =
+                emailVerificationRepository.findByEmailAndType(findPwResetDTO.getEmail(), VerificationType.PASSWORD_FIND)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND));
+
+        if(!emailVerification.getIsVerified()){
+            throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
+        }
+
+
+        findUser.setLoginPw(passwordEncoder.encode(findPwResetDTO.getLoginPw()));
+
+        emailVerification.setIsVerified(false);
+        emailVerificationRepository.save(emailVerification);
+
+        userRepository.save(findUser);
+    }
+
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
     }
