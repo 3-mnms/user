@@ -156,9 +156,9 @@ public class UserController {
 
     @PostMapping(value="/resetPasswordWithEmail")
     @Operation(summary = "비밀번호 재설정",
-            description = "로그인 비밀번호 찾기 2단계, FindLoginPwDTO(로그인아이디, 이름)을 포함해야 합니다. ex) POST /api/users/resetPassword")
+            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) POST /api/users/resetPasswordWithEmail")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "인증 성공 이메일 주소 return",
+            @ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 후 새로운 비밀번호 재설정",
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
     })
     public ResponseEntity<SuccessResponse<Void>> resetPasswordWithEmail(@Valid @RequestBody FindPwResetDTO findPwResetDTO){
