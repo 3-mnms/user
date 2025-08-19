@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
@@ -126,4 +127,17 @@ public class UserController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
     }
+
+    @PostMapping(value="/findLoginId")
+    @Operation(summary = "아이디 찾기",
+            description = "로그인 아이디 찾기, FindLoginIdDTO를 포함해야 합니다. ex) POST /api/users/findLoginId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "아이디 찾기 성공",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<String>> findLoginId(@Valid @RequestBody FindLoginIdDTO findLoginIdDTO){
+        String loginId = userService.findLoginId(findLoginIdDTO);
+        return ApiResponseUtil.success(loginId);
+    }
+
 }

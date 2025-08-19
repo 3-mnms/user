@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
+import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
 import com.tekcit.festival.domain.user.dto.request.UserProfileDTO;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
@@ -124,7 +125,6 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
     }
 
-    @Transactional(readOnly = true)
     public BookingProfileDTO bookingProfile(Long userId) {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -152,6 +152,17 @@ public class UserService {
 
         userRepository.delete(deleteUser);
     }
+
+    public String findLoginId(FindLoginIdDTO findLoginIdDTO){
+        String name  = findLoginIdDTO.getName();
+        String email = findLoginIdDTO.getEmail();
+
+        User findUser = userRepository.findByNameAndEmail(name, email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return findUser.getLoginId();
+    }
+
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
     }
