@@ -4,8 +4,7 @@ import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
 import com.tekcit.festival.domain.user.dto.request.FindPwEmailDTO;
 import com.tekcit.festival.domain.user.dto.request.FindPwResetDTO;
 import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
-import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
-import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
+import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
@@ -165,5 +164,15 @@ public class UserController {
         userService.resetPasswordWithEmail(findPwResetDTO);
         return ApiResponseUtil.success();
     }
+
+    @GetMapping(value="/myPage/userInfo")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(oneOf = { MyPageUserDTO.class, MyPageHostDTO.class, MyPageCommonDTO.class })
+    ))
+    public ResponseEntity<SuccessResponse<Object>> myPageUserInfo(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+        Object myPageDto = userService.getUserInfo(userId);
+        return ApiResponseUtil.success(myPageDto);
+    }
+
 
 }
