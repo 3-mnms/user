@@ -12,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -25,6 +27,7 @@ public class EmailService {
 
     private static final long EXPIRE_MINUTES = 5;
 
+    @Transactional
     public EmailResponseDTO sendVerificationCode(EmailSendDTO emailSendDTO){
         String code = createCode();
 
@@ -58,6 +61,7 @@ public class EmailService {
         }
     }
 
+    @Transactional
     public void saveOrUpdateEmail(String code, EmailSendDTO emailSendDTO){
         EmailVerification findExisting = emailVerificationRepository.findByEmailAndType(emailSendDTO.getEmail(), emailSendDTO.getType())
                 .map(existing ->{
@@ -76,6 +80,7 @@ public class EmailService {
         emailVerificationRepository.save(findExisting);
     }
 
+    @Transactional
     public EmailResponseDTO verifyCode(EmailVerifyDTO emailVerifyDTO) {
         EmailVerification emailVerification =
                 emailVerificationRepository.findByEmailAndType(emailVerifyDTO.getEmail(), emailVerifyDTO.getType())

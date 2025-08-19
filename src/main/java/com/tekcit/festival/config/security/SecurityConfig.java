@@ -63,7 +63,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/mail/**",
                                 "/api/auth/kakao/**",
-                                "/api/users/findLoginId"
+                                "/api/users/findLoginId",
+                                "/api/users/findRegisteredEmail",
+                                "/api/users/resetPasswordWithEmail"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

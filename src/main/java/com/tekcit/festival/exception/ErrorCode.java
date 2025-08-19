@@ -13,6 +13,7 @@ public enum ErrorCode {
     DUPLICATE_LOGIN_ID("U004", "이미 존재하는 아이디입니다. ID: %s", HttpStatus.CONFLICT),
     DUPLICATE_EMAIL_ID("U005", "이미 존재하는 이메일입니다. EMAIL: %s", HttpStatus.CONFLICT),
     DUPLICATE_KAKAO_ID("U006", "이미 존재하는 카카오 계정입니다. KAKAO_ID: %s", HttpStatus.CONFLICT),
+    USER_EMAIL_NOT_MATCH("U007", "이메일이 일치하지 않습니다. EMAIL: %s", HttpStatus.BAD_REQUEST),
 
     //    AUTH 관련 에러입니다.
     AUTH_PASSWORD_NOT_EQUAL_ERROR("A001","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
