@@ -21,7 +21,14 @@ public enum ErrorCode {
 
     VERIFICATION_NOT_FOUND("U0010", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),
     VERIFICATION_EXPIRED("U0011","인증 코드가 만료되었습니다.", HttpStatus.GONE),
-    VERIFICATION_CODE_MISMATCH("U0012","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
+    VERIFICATION_CODE_MISMATCH("U0012","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
+
+    NOTIFICATION_NOT_FOUND("N001", "예약된 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    DUPLICATE_RESOURCE("N002", "이미 예약된 알림이 존재합니다.", HttpStatus.CONFLICT),
+    REQUEST_LIMIT_EXCEEDED("N003", "하루 알림 예약 횟수 제한을 초과했습니다.", HttpStatus.TOO_MANY_REQUESTS),
+    FORBIDDEN_RESOURCE("N004", "해당 알림에 대한 접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    BAD_REQUEST("N005", "잘못된 요청입니다. 이미 전송된 알림은 수정하거나 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SEND_TIME("N006", "과거 시점에 알림을 발송할 수 없습니다.", HttpStatus.BAD_REQUEST);
 
     private final String code;        // A001, A002 등
     private final String message;     // 사용자에게 보여줄 메시지
@@ -32,4 +39,6 @@ public enum ErrorCode {
         this.message = message;
         this.status = status;
     }
+
+
 }
