@@ -5,7 +5,7 @@ import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.domain.host_admin.dto.request.NotificationScheduleDTO;
 import com.tekcit.festival.domain.host_admin.dto.response.NotificationScheduleResponseDTO;
 import com.tekcit.festival.domain.host_admin.entity.NotificationSchedule;
-import com.tekcit.festival.domain.host_admin.mapper.NotificationScheduleMapper;
+import com.tekcit.festival.domain.mapper.NotificationScheduleMapper;
 import com.tekcit.festival.domain.host_admin.repository.NotificationScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

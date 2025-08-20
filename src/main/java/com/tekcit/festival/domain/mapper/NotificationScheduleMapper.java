@@ -1,4 +1,4 @@
-package com.tekcit.festival.domain.host_admin.mapper;
+package com.tekcit.festival.domain.mapper;
 
 import com.tekcit.festival.domain.host_admin.dto.response.NotificationScheduleResponseDTO;
 import com.tekcit.festival.domain.host_admin.entity.NotificationSchedule;
@@ -16,7 +16,7 @@ public class NotificationScheduleMapper {
                 e.getBody(),
                 e.getSendTime(),
                 e.isSent(),
-                e.getFestivalFid(),
+                e.getFid(),
                 e.getStartAt()
         );
     }

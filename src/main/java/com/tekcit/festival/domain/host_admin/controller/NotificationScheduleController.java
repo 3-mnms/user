@@ -31,8 +31,8 @@ public class NotificationScheduleController {
         if (!"HOST".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        Long parsedUserId = Long.valueOf(userId); // ✅ String을 Long으로 변환
-        return ResponseEntity.ok(scheduleService.create(request, parsedUserId)); // ✅ 변환된 userId 전달
+        Long parsedUserId = Long.valueOf(userId);
+        return ResponseEntity.ok(scheduleService.create(request, parsedUserId));
     }
 
     @Operation(summary = "예약 수정", description = "예약된 알림을 수정합니다. (HOST만 가능, 본인 소유만)")
@@ -45,8 +45,8 @@ public class NotificationScheduleController {
         if (!"HOST".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        Long parsedUserId = Long.valueOf(userId); // ✅ String을 Long으로 변환
-        return ResponseEntity.ok(scheduleService.update(id, request, parsedUserId)); // ✅ 변환된 userId 전달
+        Long parsedUserId = Long.valueOf(userId);
+        return ResponseEntity.ok(scheduleService.update(id, request, parsedUserId));
     }
 
     @Operation(summary = "예약 삭제", description = "예약 알림을 삭제합니다. (HOST만 가능, 본인 소유만)")
@@ -58,8 +58,8 @@ public class NotificationScheduleController {
         if (!"HOST".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        Long parsedUserId = Long.valueOf(userId); // ✅ String을 Long으로 변환
-        scheduleService.delete(id, parsedUserId); // ✅ 변환된 userId 전달
+        Long parsedUserId = Long.valueOf(userId);
+        scheduleService.delete(id, parsedUserId);
         return ResponseEntity.ok("🗑️ 예약 삭제 완료");
     }
 
@@ -69,8 +69,8 @@ public class NotificationScheduleController {
             @RequestHeader("X-User-Role") String userRole,
             @RequestHeader("X-User-Id") String userId) {
         if ("HOST".equals(userRole)) {
-            Long parsedUserId = Long.valueOf(userId); // ✅ String을 Long으로 변환
-            return ResponseEntity.ok(scheduleService.getByUserId(parsedUserId)); // ✅ 변환된 userId 전달
+            Long parsedUserId = Long.valueOf(userId);
+            return ResponseEntity.ok(scheduleService.getByUserId(parsedUserId));
         }
         return ResponseEntity.ok(scheduleService.getAll());
     }

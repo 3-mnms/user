@@ -13,12 +13,12 @@ public class ReservationClient {
 
     private final WebClient reservationWebClient; // ** Bean 구성 시 baseUrl 설정
 
-    public List<Long> getAttendeeUserIds(String festivalFid, LocalDateTime startAt) { // **
+    public List<Long> getAttendeeUserIds(String fid, LocalDateTime startAt) { // **
         // 예시: GET /api/reservations/attendees?fid=PF000123&startAt=2025-08-07T18:00:00
         return reservationWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/reservations/attendees")
-                        .queryParam("fid", festivalFid)
+                        .queryParam("fid", fid)
                         .queryParam("startAt", startAt) // ISO-8601로 직렬화
                         .build())
                 .retrieve()
