@@ -10,7 +10,6 @@ import com.tekcit.festival.domain.user.enums.VerificationType;
 import com.tekcit.festival.domain.user.repository.*;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
-import com.tekcit.festival.utils.CookieUtil;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -224,16 +223,25 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(UpdateUserDTO updateUserDTO, Long userId){
+    public UpdateUserResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO, Long userId){
         User findUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+        UserProfile findProfile = userProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String rNum = updateUserDTO.getResidentNum();
+        findUser.setName(updateUserRequestDTO.getName());
+        findUser.setPhone(updateUserRequestDTO.getPhone());
 
+        String rNum = updateUserRequestDTO.getResidentNum();
+        findProfile.updateResidentInfo(rNum);
+
+        userRepository.save(findUser);
+        userProfileRepository.save(findProfile);
+
+        return UpdateUserResponseDTO.fromUserEntity(findUser, findProfile);
     }
+
 
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
