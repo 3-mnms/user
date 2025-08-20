@@ -117,16 +117,5 @@ public class KakaoAuthController {
             throw ex;
         }
     }
-
-    @DeleteMapping
-    public ResponseEntity<Void> deleteKakaoUser(@AuthenticationPrincipal(expression = "user.userId") Long userId){
-        kakaoService.deleteKakaoUser(userId);
-        ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
-
-        return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
-    }
-
 }
 

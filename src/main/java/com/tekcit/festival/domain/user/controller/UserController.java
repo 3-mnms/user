@@ -1,11 +1,7 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
-import com.tekcit.festival.domain.user.dto.request.FindPwEmailDTO;
-import com.tekcit.festival.domain.user.dto.request.FindPwResetDTO;
-import com.tekcit.festival.domain.user.dto.request.SignupUserDTO;
-import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
-import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
+import com.tekcit.festival.domain.user.dto.request.*;
+import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
@@ -18,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -163,6 +160,23 @@ public class UserController {
     })
     public ResponseEntity<SuccessResponse<Void>> resetPasswordWithEmail(@Valid @RequestBody FindPwResetDTO findPwResetDTO){
         userService.resetPasswordWithEmail(findPwResetDTO);
+        return ApiResponseUtil.success();
+    }
+
+    @GetMapping(value="/myPage/userInfo")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(oneOf = { MyPageUserDTO.class, MyPageHostDTO.class, MyPageCommonDTO.class })
+    ))
+    public ResponseEntity<SuccessResponse<Object>> myPageUserInfo(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+        Object myPageDto = userService.getUserInfo(userId);
+        return ApiResponseUtil.success(myPageDto);
+    }
+
+    @PostMapping(value="/updateUser")
+    @Operation(summary = "마이페이지 회원 정보 수정",
+            description = "마이페이지 회원 정보 수정, UpdateUserDTO를 포함해야 합니다. ex) POST /api/users/updateUser")
+    public ResponseEntity<SuccessResponse<Void>> updateUser(@Valid @RequestBody UpdateUserDTO updateUserDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+        userService.updateUser(updateUserDTO, userId);
         return ApiResponseUtil.success();
     }
 

@@ -1,6 +1,5 @@
 package com.tekcit.festival.domain.user.dto.response;
 
-import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import io.swagger.v3.oas.annotations.media.Schema;

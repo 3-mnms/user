@@ -2,17 +2,12 @@ package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.*;
-import com.tekcit.festival.domain.user.dto.response.AddressDTO;
-import com.tekcit.festival.domain.user.dto.response.BookingProfileDTO;
-import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
+import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.entity.*;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.enums.VerificationType;
-import com.tekcit.festival.domain.user.repository.AddressRepository;
-import com.tekcit.festival.domain.user.repository.EmailVerificationRepository;
-import com.tekcit.festival.domain.user.repository.UserProfileRepository;
-import com.tekcit.festival.domain.user.repository.UserRepository;
+import com.tekcit.festival.domain.user.repository.*;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.utils.CookieUtil;
@@ -31,11 +26,12 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final HostProfileRepository hostProfileRepository;
     private final UserProfileRepository userProfileRepository;
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
-    private final CookieUtil cookieUtil;
+    private final KakaoOAuthService kakaoOAuthService;
 
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
@@ -148,6 +144,14 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
         }
 
+        if (deleteUser.getOauthProvider() == OAuthProvider.KAKAO) {
+            try {
+                kakaoOAuthService.unlinkByAdmin(deleteUser.getOauthProviderId());
+            } catch (Exception e) {
+                throw new BusinessException(ErrorCode.KAKAO_UNLINK_FAILED, e.getMessage());
+            }
+        }
+
         userRepository.delete(deleteUser);
     }
 
@@ -187,13 +191,48 @@ public class UserService {
             throw new BusinessException(ErrorCode.USER_EMAIL_NOT_VERIFIED);
         }
 
-
         findUser.setLoginPw(passwordEncoder.encode(findPwResetDTO.getLoginPw()));
 
         emailVerification.setIsVerified(false);
         emailVerificationRepository.save(emailVerification);
 
         userRepository.save(findUser);
+    }
+
+    public Object getUserInfo(Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if(findUser.getRole() == UserRole.USER) {
+            UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            List<Address> addresses = addressRepository.findAllByUserProfile(profile);
+
+            List<AddressDTO> addressDTOS = addresses.stream()
+                    .map(address->AddressDTO.fromEntity(address))
+                    .toList();
+            return MyPageUserDTO.fromUserEntity(findUser, profile, addressDTOS);
+        }
+        else if(findUser.getRole() == UserRole.HOST){
+            HostProfile profile = hostProfileRepository.findByUser_UserId(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+            return MyPageHostDTO.fromHostEntity(findUser, profile);
+        }
+
+        return MyPageCommonDTO.fromAdminEntity(findUser);
+    }
+
+    @Transactional
+    public void updateUser(UpdateUserDTO updateUserDTO, Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        String rNum = updateUserDTO.getResidentNum();
+
     }
 
     public boolean checkLoginId(String loginId){
