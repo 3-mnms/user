@@ -16,6 +16,8 @@ public enum ErrorCode {
     USER_EMAIL_NOT_MATCH("U007", "이메일이 일치하지 않습니다. EMAIL: %s", HttpStatus.BAD_REQUEST),
     ADDRESS_NOT_FOUND("U008", "주소가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     ADDRESS_NOT_ALLOWED("U009", "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
+    ADDRESS_DEFAULT_NOT_DELETED("U010", "기본 주소지는 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
+
     //    AUTH 관련 에러입니다.
     AUTH_PASSWORD_NOT_EQUAL_ERROR("A001","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
     AUTH_REFRESH_TOKEN_EXPIRED("A002", "Refresh Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),

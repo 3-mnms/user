@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -273,6 +274,26 @@ public class UserService {
     }
 
     @Transactional
+    public AddressDTO updateDefault(Long addressId, Long userId){
+        Address newAddress = addressRepository.findById(addressId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!newAddress.getUserProfile().getUId().equals(userProfile.getUId())) {
+            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
+        }
+
+        addressRepository.findDefaultByUserId(userId)
+                .ifPresent(Address::unsetDefault);
+
+        newAddress.setAsDefault();
+
+        return AddressDTO.fromEntity(newAddress);
+    }
+
+    @Transactional
     public void deleteAddress(Long addressId, Long userId){
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
@@ -283,6 +304,9 @@ public class UserService {
         if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
             throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
         }
+
+        if(address.isDefault())
+            throw new BusinessException(ErrorCode.ADDRESS_DEFAULT_NOT_DELETED);
 
         addressRepository.delete(address);
     }
