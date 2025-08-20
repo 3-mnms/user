@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.Update;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import com.tekcit.festival.exception.global.ErrorResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -88,7 +89,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
             @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
     })
-    public ResponseEntity<SuccessResponse<Void>> changeState(@Valid @PathVariable Long userId, @RequestParam boolean active, Authentication authentication){
+    public ResponseEntity<SuccessResponse<Void>> changeState(@PathVariable Long userId, @RequestParam boolean active, Authentication authentication){
         userService.changeState(userId, active, authentication);
         return ApiResponseUtil.success(null, "회원 상태 조정 완료");
     }
@@ -151,9 +152,9 @@ public class UserController {
         return ApiResponseUtil.success(email);
     }
 
-    @PostMapping(value="/resetPasswordWithEmail")
+    @PatchMapping(value="/resetPasswordWithEmail")
     @Operation(summary = "비밀번호 재설정",
-            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) POST /api/users/resetPasswordWithEmail")
+            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) PATCH /api/users/resetPasswordWithEmail")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 후 새로운 비밀번호 재설정",
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
@@ -164,6 +165,9 @@ public class UserController {
     }
 
     @GetMapping(value="/myPage/userInfo")
+    @Operation(summary = "마이페이지 회원 정보 조회",
+            description = "마이페이지 회원 정보 조회, MyPageUserDTO(USER), MyPageHostDTO(HOST), MyPageCommonDTO(ADMIN) Role에 따라 return 값이 달라집니다." +
+                    "ex) GET /api/users/myPage/userInfo")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(oneOf = { MyPageUserDTO.class, MyPageHostDTO.class, MyPageCommonDTO.class })
     ))
@@ -172,12 +176,16 @@ public class UserController {
         return ApiResponseUtil.success(myPageDto);
     }
 
-    @PostMapping(value="/updateUser")
+    @PatchMapping(value="/updateUser")
     @Operation(summary = "마이페이지 회원 정보 수정",
-            description = "마이페이지 회원 정보 수정, UpdateUserDTO를 포함해야 합니다. ex) POST /api/users/updateUser")
-    public ResponseEntity<SuccessResponse<Void>> updateUser(@Valid @RequestBody UpdateUserDTO updateUserDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
-        userService.updateUser(updateUserDTO, userId);
-        return ApiResponseUtil.success();
+            description = "마이페이지 회원 정보 수정, UpdateUserRequestDTO를 포함해야 합니다. ex) PATCH /api/users/updateUser")
+    public ResponseEntity<SuccessResponse<UpdateUserResponseDTO>> updateUser(@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+        UpdateUserResponseDTO updateUserDTO = userService.updateUser(updateUserRequestDTO, userId);
+        return ApiResponseUtil.success(updateUserDTO);
     }
+
+
+
+
 
 }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateUserDTO {
+public class UpdateUserRequestDTO {
     @Schema(description = "회원 이름")
     @NotBlank(message = "이름은 필수 입력사항 입니다.")
     private String name;

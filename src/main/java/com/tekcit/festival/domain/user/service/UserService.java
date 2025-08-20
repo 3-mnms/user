@@ -10,7 +10,6 @@ import com.tekcit.festival.domain.user.enums.VerificationType;
 import com.tekcit.festival.domain.user.repository.*;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
-import com.tekcit.festival.utils.CookieUtil;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -224,15 +223,78 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(UpdateUserDTO updateUserDTO, Long userId){
+    public UpdateUserResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO, Long userId){
         User findUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+        UserProfile findProfile = userProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String rNum = updateUserDTO.getResidentNum();
+        findUser.setName(updateUserRequestDTO.getName());
+        findUser.setPhone(updateUserRequestDTO.getPhone());
 
+        String rNum = updateUserRequestDTO.getResidentNum();
+        findProfile.updateResidentInfo(rNum);
+
+        userRepository.save(findUser);
+        userProfileRepository.save(findProfile);
+
+        return UpdateUserResponseDTO.fromUserEntity(findUser, findProfile);
+    }
+
+    @Transactional
+    public AddressDTO addAddress(AddressRequestDTO addressRequestDTO, Long userId){
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        Address address = addressRequestDTO.toAddressEntity(userProfile);
+        userProfile.getAddresses().add(address);
+
+        userProfileRepository.save(userProfile);
+        return AddressDTO.fromEntity(address);
+    }
+
+    @Transactional
+    public AddressDTO updateAddress(Long addressId, AddressRequestDTO addressRequestDTO, Long userId){
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
+            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
+        }
+
+        address.setAddress(addressRequestDTO.getAddress());
+        address.setZipCode(addressRequestDTO.getZipCode());
+
+        addressRepository.save(address);
+        return AddressDTO.fromEntity(address);
+    }
+
+    @Transactional
+    public void deleteAddress(Long addressId, Long userId){
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
+            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
+        }
+
+        addressRepository.delete(address);
+    }
+
+    public List<AddressDTO> getAddresses(Long userId){
+        List<Address> addresses = addressRepository.findAllByUserId(userId);
+
+        List<AddressDTO> addressDTOS = addresses.stream()
+                .map(address->AddressDTO.fromEntity(address))
+                .toList();
+
+        return addressDTOS;
     }
 
     public boolean checkLoginId(String loginId){
