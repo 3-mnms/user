@@ -18,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -123,16 +125,15 @@ public class UserService {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return BookingProfileDTO.fromEntity(bookingUser);
+    }
 
-        List<Address> addresses = addressRepository.findAllByUserProfile(profile);
+    public List<ReservationUserDTO> getReservationUserInfo(List<Long> userIds){
+        List<User> users = userRepository.findAllById(userIds);
 
-        List<AddressDTO> addressDTOS = addresses.stream()
-                .map(address->AddressDTO.fromEntity(address))
-                .toList();
-
-        return BookingProfileDTO.fromEntity(bookingUser, profile, addressDTOS);
+        return users.stream()
+                .map(ReservationUserDTO::fromUserEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional
