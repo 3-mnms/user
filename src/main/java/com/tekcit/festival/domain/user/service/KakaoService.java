@@ -120,26 +120,6 @@ public class KakaoService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    @Transactional
-    public void deleteKakaoUser(Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getRole() != UserRole.USER)
-            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
-
-        if (user.getOauthProvider() == OAuthProvider.KAKAO) {
-            try {
-                kakaoOAuthService.unlinkByAdmin(user.getOauthProviderId());
-            } catch (Exception e) {
-                throw new BusinessException(ErrorCode.KAKAO_UNLINK_FAILED, e.getMessage());
-            }
-        }
-
-        userRepository.delete(user);
-    }
-
-
     public record KakaoCallbackResult(boolean isNew, String signupTicket, String kakaoId) {}
 
 }

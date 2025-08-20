@@ -31,7 +31,7 @@ public class UserService {
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
-    private final CookieUtil cookieUtil;
+    private final KakaoOAuthService kakaoOAuthService;
 
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
@@ -144,6 +144,14 @@ public class UserService {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
         }
 
+        if (deleteUser.getOauthProvider() == OAuthProvider.KAKAO) {
+            try {
+                kakaoOAuthService.unlinkByAdmin(deleteUser.getOauthProviderId());
+            } catch (Exception e) {
+                throw new BusinessException(ErrorCode.KAKAO_UNLINK_FAILED, e.getMessage());
+            }
+        }
+
         userRepository.delete(deleteUser);
     }
 
@@ -213,6 +221,18 @@ public class UserService {
         }
 
         return MyPageCommonDTO.fromAdminEntity(findUser);
+    }
+
+    @Transactional
+    public void updateUser(UpdateUserDTO updateUserDTO, Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        UserProfile profile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        String rNum = updateUserDTO.getResidentNum();
+
     }
 
     public boolean checkLoginId(String loginId){
