@@ -7,27 +7,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "예매자 정보 DTO", name = "ReservationUserDTO")
+@Schema(description = "가예매자 DTO", name = "ReservationUserDTO")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReservationUserDTO {
-    @Schema(description = "예매자 userId")
-    private Long userId;
-
-    @Schema(description = "예매자 이름")
+public class PreReservationDTO {
+    @Schema(description = "가예매자 이름")
     private String name;
 
-    @Schema(description = "예매자 전화번호")
+    @Schema(description = "가예매자 전화번호")
     private String phone;
 
+    @Schema(description = "가예매자 이메일")
+    private String email;
+
     @Schema(hidden = true)
-    public static ReservationUserDTO fromUserEntity(User user) {
-        return ReservationUserDTO.builder()
-                .userId(user.getUserId())
+    public static PreReservationDTO fromUserEntity(User user) {
+        return PreReservationDTO.builder()
                 .name(user.getName())
                 .phone(user.getPhone())
+                .email(user.getEmail())
                 .build();
     }
 }

@@ -14,14 +14,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/admin")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Tag(name = "운영 관리자 api", description = "전체 회원 조회, 전체 주최자 조회")
 public class AdminController {
@@ -30,7 +29,7 @@ public class AdminController {
 
     @GetMapping(value="/userList")
     @Operation(summary = "사용자 전체 목록 조회",
-            description = "사용자 전체 목록 조회(user), ex) GET /api/users/admin/userList")
+            description = "사용자 전체 목록 조회(user), ex) GET /api/admin/userList")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<List<AdminUserListDTO>>> getAllUser(@AuthenticationPrincipal CustomUserDetails userDetails){
         User adminUser = userDetails.getUser();
@@ -40,7 +39,8 @@ public class AdminController {
 
     @GetMapping(value="/hostList")
     @Operation(summary = "주최자 전체 목록 조회",
-            description = "주최자 전체 목록 조회(host), ex) GET /api/users/admin/hostList")
+            description = "주최자 전체 목록 조회(host), ex) GET /api/admin/hostList")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<List<AdminHostListDTO>>> getAllHostList(@AuthenticationPrincipal CustomUserDetails userDetails){
         User adminUser = userDetails.getUser();
         List<AdminHostListDTO> hostListDTOS = adminService.getAllHost(adminUser);
@@ -49,7 +49,7 @@ public class AdminController {
 
     @PatchMapping(value="/{userId}/state")
     @Operation(summary = "회원 상태 변경 (활성화 / 비활성화)",
-            description = "운영관리자는 userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경할 수 있습니다. ex) PATCH /api/users/{userId}/state?active=false")
+            description = "운영관리자는 userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경할 수 있습니다. ex) PATCH /api/admin/{userId}/state?active=false")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 상태(active) 조정 완료"),
             @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
@@ -64,7 +64,7 @@ public class AdminController {
 
     @DeleteMapping(value="/{userId}")
     @Operation(summary = "주최자 탈퇴(삭제)",
-            description = "운영관리자가 주최자 탈퇴(host), ex) DELETE /api/users/admin/{userId}")
+            description = "운영관리자가 주최자 탈퇴(host), ex) DELETE /api/admin/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<Void>> deleteHost(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long userId){
         User adminUser = userDetails.getUser();

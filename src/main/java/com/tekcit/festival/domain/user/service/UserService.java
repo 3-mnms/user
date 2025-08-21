@@ -1,6 +1,5 @@
 package com.tekcit.festival.domain.user.service;
 
-import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.*;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.entity.*;
@@ -13,7 +12,6 @@ import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -213,6 +211,53 @@ public class UserService {
         return UpdateUserResponseDTO.fromUserEntity(findUser, findProfile);
     }
 
+    public void checkPassword(Long userId, CheckPwDTO checkPwDTO){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 비밀번호 검증이 없습니다.");
+        }
+
+        if (!passwordEncoder.matches(checkPwDTO.getLoginPw(), findUser.getLoginPw())) {
+            throw new BusinessException(ErrorCode.AUTH_PASSWORD_NOT_EQUAL_ERROR);
+        }
+    }
+
+    @Transactional
+    public void resetPassword(Long userId, ResetPwDTO resetPwDTO){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 비밀번호가 없습니다.");
+        }
+
+        findUser.setLoginPw(passwordEncoder.encode(resetPwDTO.getLoginPw()));
+        userRepository.save(findUser);
+    }
+
+    public PreReservationDTO getPreReservation(Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return PreReservationDTO.fromUserEntity(findUser);
+    }
+
+    public AssignmentDTO getAssignmentUserInfo(String email){
+        User findUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return AssignmentDTO.fromUserEntity(findUser);
+    }
+
+    public List<StatisticsDTO> getStatisticsInfo(List<Long> userIds){
+        List<UserProfile> userProfiles = userProfileRepository.findAllByUserIds(userIds);
+
+        return userProfiles.stream()
+                .map(StatisticsDTO::fromUserProfileEntity)
+                .collect(Collectors.toList());
+    }
 
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
