@@ -10,12 +10,11 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Schema(description = "마이페이지 일반 사용자 조회 DTO", name = "MyPageUserDTO")
-@Getter
-@Setter
+@Schema(description = "운영관리자 일반 사용자 전체 조회 DTO", name = "AdminUserListDTO")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 public class AdminUserListDTO {
 
     @Schema(description = "회원 이름")
@@ -61,6 +60,7 @@ public class AdminUserListDTO {
                 .birth(userProfile.getBirth())
                 .gender(userProfile.getGender())
                 .addresses(addresses)
+                .isActive(userProfile.isActive())
                 .build();
     }
 }

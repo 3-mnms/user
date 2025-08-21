@@ -3,6 +3,7 @@ package com.tekcit.festival.domain.user.service;
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.entity.User;
+import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
@@ -20,20 +21,49 @@ import java.util.List;
 public class AdminService {
     private final UserRepository userRepository;
 
-    public List<AdminUserListDTO> getAllUser(Authentication authentication) {
-        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
-        User adminUser = currentUser.getUser();
+    public List<AdminUserListDTO> getAllUser(User adminUser) {
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
         }
 
-        List<User> users = userRepository.findAllByRole(UserRole.USER);
+        List<User> users = userRepository.findAllUserByRole(UserRole.USER);
 
         List<AdminUserListDTO> userListDTOS = users.stream()
                                                     .map(AdminUserListDTO::fromUserEntity)
                                                     .toList();
         return userListDTOS;
+    }
+
+    public List<AdminHostListDTO> getAllHost(User adminUser) {
+        // 운영자 권한 확인
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        List<User> users = userRepository.findAllHostByRole(UserRole.HOST);
+
+        List<AdminHostListDTO> hostListDTOS = users.stream()
+                .map(AdminHostListDTO::fromUserEntity)
+                .toList();
+        return hostListDTOS;
+    }
+
+    @Transactional
+    public void deleteHost(User adminUser, Long userId){
+        // 운영자 권한 확인
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        User deleteUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (deleteUser.getRole() != UserRole.HOST) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        userRepository.delete(deleteUser);
     }
 
 }
