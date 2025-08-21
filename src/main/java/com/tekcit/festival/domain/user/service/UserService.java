@@ -90,35 +90,6 @@ public class UserService {
         return UserResponseDTO.fromEntity(user);
     }
 
-    @Transactional
-    public void changeState(Long userId, boolean active, Authentication authentication){
-        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
-        User adminUser = currentUser.getUser();
-
-        // 운영자 권한 확인
-        if (adminUser.getRole() != UserRole.ADMIN) {
-            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
-        }
-
-        User changeUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (changeUser.getRole() == UserRole.USER) {
-            if(active)
-                changeUser.getUserProfile().activate();
-            else
-                changeUser.getUserProfile().deactivate();
-        }
-        else if(changeUser.getRole() == UserRole.HOST){
-            if(active)
-                changeUser.getHostProfile().activate();
-            else
-                changeUser.getHostProfile().deactivate();
-        }
-        else
-            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
-    }
-
     public BookingProfileDTO bookingProfile(Long userId) {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

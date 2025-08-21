@@ -28,7 +28,6 @@ public class AdminService {
         }
 
         List<User> users = userRepository.findAllUserByRole(UserRole.USER);
-
         List<AdminUserListDTO> userListDTOS = users.stream()
                                                     .map(AdminUserListDTO::fromUserEntity)
                                                     .toList();
@@ -47,6 +46,32 @@ public class AdminService {
                 .map(AdminHostListDTO::fromUserEntity)
                 .toList();
         return hostListDTOS;
+    }
+
+    @Transactional
+    public void changeState(Long userId, boolean active, User adminUser){
+        // 운영자 권한 확인
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
+        User changeUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (changeUser.getRole() == UserRole.USER) {
+            if(active)
+                changeUser.getUserProfile().activate();
+            else
+                changeUser.getUserProfile().deactivate();
+        }
+        else if(changeUser.getRole() == UserRole.HOST){
+            if(active)
+                changeUser.getHostProfile().activate();
+            else
+                changeUser.getHostProfile().deactivate();
+        }
+        else
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
     }
 
     @Transactional

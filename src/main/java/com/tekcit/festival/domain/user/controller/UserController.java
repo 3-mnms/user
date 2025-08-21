@@ -81,19 +81,6 @@ public class UserController {
         return ApiResponseUtil.success(signupAdmin);
     }
 
-    @PatchMapping(value="/{userId}/state")
-    @Operation(summary = "회원 상태 변경 (활성화 / 비활성화)",
-            description = "userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경합니다. ex) PATCH /api/users/{userId}/state?active=false")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 상태(active) 조정 완료"),
-            @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
-            @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
-    })
-    public ResponseEntity<SuccessResponse<Void>> changeState(@PathVariable Long userId, @RequestParam boolean active, Authentication authentication){
-        userService.changeState(userId, active, authentication);
-        return ApiResponseUtil.success(null, "회원 상태 조정 완료");
-    }
-
     @GetMapping(value="/checkLoginId")
     @Operation(summary = "로그인 아이디 중복 확인",
             description = "로그인 아이디 중복 확인, ex) GET /api/users/checkLoginId?loginId=test")
