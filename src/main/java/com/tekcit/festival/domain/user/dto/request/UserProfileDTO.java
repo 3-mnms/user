@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.dto.request;
 
 import com.tekcit.festival.domain.user.entity.Address;
+import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,10 +42,12 @@ public class UserProfileDTO {
                 .build();
     }
 
-    public Address toAddressEntity(UserProfile userProfile){
+    public Address toAddressEntity(User user, UserProfile userProfile){
         return Address.builder()
                 .address(address)
                 .zipCode(zipCode)
+                .name(user.getName())
+                .phone(user.getPhone())
                 .isDefault(true)
                 .userProfile(userProfile)
                 .build();

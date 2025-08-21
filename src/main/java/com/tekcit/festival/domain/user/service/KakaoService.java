@@ -92,7 +92,7 @@ public class KakaoService {
         String rNum = userProfileDTO.getResidentNum();
         UserProfile userProfile = userProfileDTO.toEntity(ResidentUtil.calcAge(rNum), ResidentUtil.extractGender(rNum), ResidentUtil.calcBirth(rNum));
 
-        Address address = userProfileDTO.toAddressEntity(userProfile);
+        Address address = userProfileDTO.toAddressEntity(kakaoUser, userProfile);
         userProfile.getAddresses().add(address);
 
         userProfile.setUser(kakaoUser);

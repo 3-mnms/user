@@ -22,6 +22,12 @@ public class Address {
     @Column(name = "zip_code", nullable = false)
     private String zipCode;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "phone", nullable = false)
+    private String phone;
+
     @Builder.Default
     @Column(name = "is_default", nullable = false)
     private boolean isDefault = false;
