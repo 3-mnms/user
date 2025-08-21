@@ -16,17 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
-    private final HostProfileRepository hostProfileRepository;
-    private final UserProfileRepository userProfileRepository;
-    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final KakaoOAuthService kakaoOAuthService;
@@ -86,21 +80,6 @@ public class UserService {
 
         userRepository.save(user);
         return UserResponseDTO.fromEntity(user);
-    }
-
-    public BookingProfileDTO bookingProfile(Long userId) {
-        User bookingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        return BookingProfileDTO.fromEntity(bookingUser);
-    }
-
-    public List<ReservationUserDTO> getReservationUserInfo(List<Long> userIds){
-        List<User> users = userRepository.findAllById(userIds);
-
-        return users.stream()
-                .map(ReservationUserDTO::fromUserEntity)
-                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -165,98 +144,6 @@ public class UserService {
         emailVerificationRepository.save(emailVerification);
 
         userRepository.save(findUser);
-    }
-
-    public Object getUserInfo(Long userId){
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if(findUser.getRole() == UserRole.USER) {
-            UserProfile profile = userProfileRepository.findByUser_UserId(userId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-            List<Address> addresses = addressRepository.findAllByUserProfile(profile);
-
-            List<AddressDTO> addressDTOS = addresses.stream()
-                    .map(address->AddressDTO.fromEntity(address))
-                    .toList();
-            return MyPageUserDTO.fromUserEntity(findUser, profile, addressDTOS);
-        }
-        else if(findUser.getRole() == UserRole.HOST){
-            HostProfile profile = hostProfileRepository.findByUser_UserId(userId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-            return MyPageHostDTO.fromHostEntity(findUser, profile);
-        }
-
-        return MyPageCommonDTO.fromAdminEntity(findUser);
-    }
-
-    @Transactional
-    public UpdateUserResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO, Long userId){
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        UserProfile findProfile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        findUser.setName(updateUserRequestDTO.getName());
-        findUser.setPhone(updateUserRequestDTO.getPhone());
-
-        String rNum = updateUserRequestDTO.getResidentNum();
-        findProfile.updateResidentInfo(rNum);
-
-        userRepository.save(findUser);
-        userProfileRepository.save(findProfile);
-
-        return UpdateUserResponseDTO.fromUserEntity(findUser, findProfile);
-    }
-
-    public void checkPassword(Long userId, CheckPwDTO checkPwDTO){
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
-            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 비밀번호 검증이 없습니다.");
-        }
-
-        if (!passwordEncoder.matches(checkPwDTO.getLoginPw(), findUser.getLoginPw())) {
-            throw new BusinessException(ErrorCode.AUTH_PASSWORD_NOT_EQUAL_ERROR);
-        }
-    }
-
-    @Transactional
-    public void resetPassword(Long userId, ResetPwDTO resetPwDTO){
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
-            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 비밀번호가 없습니다.");
-        }
-
-        findUser.setLoginPw(passwordEncoder.encode(resetPwDTO.getLoginPw()));
-        userRepository.save(findUser);
-    }
-
-    public PreReservationDTO getPreReservation(Long userId){
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        return PreReservationDTO.fromUserEntity(findUser);
-    }
-
-    public AssignmentDTO getAssignmentUserInfo(String email){
-        User findUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        return AssignmentDTO.fromUserEntity(findUser);
-    }
-
-    public List<StatisticsDTO> getStatisticsInfo(List<Long> userIds){
-        List<UserProfile> userProfiles = userProfileRepository.findAllByUserIds(userIds);
-
-        return userProfiles.stream()
-                .map(StatisticsDTO::fromUserProfileEntity)
-                .collect(Collectors.toList());
     }
 
     public boolean checkLoginId(String loginId){

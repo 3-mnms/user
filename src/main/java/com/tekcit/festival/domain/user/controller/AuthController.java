@@ -102,13 +102,4 @@ public class AuthController {
         AccessTokenInfoDTO info = authService.parseAccessToken(claims);
         return ApiResponseUtil.success(info, "토큰 파싱 성공");
     }
-
-
-    @GetMapping("/me")
-    public ResponseEntity<SuccessResponse<String>> getMyInfo(Authentication authentication) {
-            // SecurityContext에서 로그인한 사용자 정보 확인
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return ApiResponseUtil.success("Hello, " + userDetails.getUsername());
-    }
-
 }
