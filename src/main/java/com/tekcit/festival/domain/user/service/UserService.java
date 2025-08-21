@@ -18,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -244,83 +242,6 @@ public class UserService {
         return UpdateUserResponseDTO.fromUserEntity(findUser, findProfile);
     }
 
-    @Transactional
-    public AddressDTO addAddress(AddressRequestDTO addressRequestDTO, Long userId){
-        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        Address address = addressRequestDTO.toAddressEntity(userProfile);
-        userProfile.getAddresses().add(address);
-
-        userProfileRepository.save(userProfile);
-        return AddressDTO.fromEntity(address);
-    }
-
-    @Transactional
-    public AddressDTO updateAddress(Long addressId, AddressRequestDTO addressRequestDTO, Long userId){
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
-            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
-        }
-
-        address.setAddress(addressRequestDTO.getAddress());
-        address.setZipCode(addressRequestDTO.getZipCode());
-
-        addressRepository.save(address);
-        return AddressDTO.fromEntity(address);
-    }
-
-    @Transactional
-    public AddressDTO updateDefault(Long addressId, Long userId){
-        Address newAddress = addressRepository.findById(addressId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (!newAddress.getUserProfile().getUId().equals(userProfile.getUId())) {
-            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
-        }
-
-        addressRepository.findDefaultByUserId(userId)
-                .ifPresent(Address::unsetDefault);
-
-        newAddress.setAsDefault();
-
-        return AddressDTO.fromEntity(newAddress);
-    }
-
-    @Transactional
-    public void deleteAddress(Long addressId, Long userId){
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
-            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
-        }
-
-        if(address.isDefault())
-            throw new BusinessException(ErrorCode.ADDRESS_DEFAULT_NOT_DELETED);
-
-        addressRepository.delete(address);
-    }
-
-    public List<AddressDTO> getAddresses(Long userId){
-        List<Address> addresses = addressRepository.findAllByUserId(userId);
-
-        List<AddressDTO> addressDTOS = addresses.stream()
-                .map(address->AddressDTO.fromEntity(address))
-                .toList();
-
-        return addressDTOS;
-    }
 
     public boolean checkLoginId(String loginId){
         return !userRepository.existsByLoginId(loginId);
