@@ -23,6 +23,9 @@ public enum ErrorCode {
     VERIFICATION_EXPIRED("U0011","인증 코드가 만료되었습니다.", HttpStatus.GONE),
     VERIFICATION_CODE_MISMATCH("U0012","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
 
+    NOT_FOUND("R001", "요청한 리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FORBIDDEN("A001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
+
     NOTIFICATION_NOT_FOUND("N001", "예약된 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     DUPLICATE_RESOURCE("N002", "이미 예약된 알림이 존재합니다.", HttpStatus.CONFLICT),
     REQUEST_LIMIT_EXCEEDED("N003", "하루 알림 예약 횟수 제한을 초과했습니다.", HttpStatus.TOO_MANY_REQUESTS),

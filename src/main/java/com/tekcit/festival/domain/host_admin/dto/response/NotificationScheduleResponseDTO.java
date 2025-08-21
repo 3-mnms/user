@@ -24,7 +24,7 @@ public class NotificationScheduleResponseDTO {
     @Schema(description = "알림 내용", example = "잠시 후 공연이 시작됩니다. 준비해 주세요.")
     private String body;
 
-    @Schema(description = "알림 발송 시각", example = "2024-12-25T18:00:00")
+    @Schema(description = "알림 발송 시각", example = "2024-12-25T18:00")
     private LocalDateTime sendTime;
 
     @Schema(description = "알림 발송 여부", example = "false")
@@ -33,6 +33,6 @@ public class NotificationScheduleResponseDTO {
     @Schema(description = "페스티벌 고유 ID", example = "FB123456")
     private String fid;
 
-    @Schema(description = "공연 시작 시각", example = "2024-12-25T18:30:00")
+    @Schema(description = "공연 시작 시각", example = "2024-12-25T18:30")
     private LocalDateTime startAt;
 }

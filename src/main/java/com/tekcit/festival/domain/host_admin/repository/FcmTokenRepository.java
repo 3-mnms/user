@@ -14,7 +14,6 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
     Optional<FcmToken> findByUser(User user);
 
-    // ✅ (신규) userId들의 활성 토큰을 한 번에 조회
-    @Query("select distinct t.token from FcmToken t where t.user.userId in :userIds") // ✅ user.id -> user.userId로 수정
+    @Query("select distinct t.token from FcmToken t where t.user.userId in :userIds")
     List<String> findTokensByUserIds(@Param("userIds") Collection<Long> userIds);
 }

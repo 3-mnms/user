@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NotificationScheduleRepository extends JpaRepository<NotificationSchedule, Long> {
+    List<NotificationSchedule> findBySendTime(LocalDateTime sendTime);
     // 중복 방지 사전 체크
     boolean existsByFidAndStartAtAndSendTime(String fid, LocalDateTime startAt, LocalDateTime sendTime);
     // 일일 건수 제한 체크

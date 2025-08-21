@@ -7,14 +7,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    /**
-     * WebClient 빈을 스프링 컨테이너에 등록합니다.
-     * WebClient.Builder를 사용하여 커스터마이징된 WebClient를 생성할 수 있습니다.
-     */
     @Bean
-    public WebClient webClient() {
-        // 기본 URL, 타임아웃 등 필요한 설정을 추가할 수 있습니다.
+    public WebClient bookingWebClient() {
         return WebClient.builder()
+                .baseUrl("http://localhost:8082")
                 .build();
     }
+
+    // 다른 외부 서비스 호출을 할 수 있음
+    // @Bean
+    // public WebClient anotherWebClient() {
+    //     return WebClient.builder()
+    //            .baseUrl("http://another-service-url")
+    //            .build();
+    // }
 }

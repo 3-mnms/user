@@ -1,68 +1,109 @@
 package com.tekcit.festival.domain.host_admin.service;
 
-import com.tekcit.festival.domain.host_admin.repository.FcmTokenRepository;
-import com.tekcit.festival.domain.host_admin.service.FcmService;
-import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.repository.UserRepository;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.tekcit.festival.domain.host_admin.entity.NotificationSchedule;
+import com.tekcit.festival.domain.host_admin.repository.NotificationScheduleRepository;
+import com.tekcit.festival.domain.host_admin.service.BookingInfoDTO;
+import com.tekcit.festival.domain.host_admin.service.NotificationService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationSchedulerService {
 
-    private final FcmService fcmService;
-    private final UserRepository userRepository; // Optional, for user lookup if needed
+    private final WebClient bookingWebClient;
+    private final NotificationService notificationService;
+    private final NotificationScheduleRepository scheduleRepository;
 
-    // reservation MSA의 API 호출 관련 필드 추후 완성되면 추가
-
-    /**
-     * ✅ cron 표현식을 사용하여 10분마다 실행
-     * 예약된 시간 10분 전에 알림을 보내는 스케줄러.
-     * Reservation MSA의 API를 호출하여 해당 시간의 예약자 리스트를 가져옵니다.
-     */
-    @Scheduled(cron = "0 */10 * * * *") // 매 10분마다 실행
-    public void sendReservationNotifications() {
+    @Scheduled(cron = "0 */1 * * * *")
+    @Transactional
+    public void sendScheduledNotifications() {
         log.info("⏰ 예약 알림 스케줄러 실행: {}", LocalDateTime.now());
 
-        // Reservation MSA의 API가 아직 완성되지 않았으므로 임시로 Mock 데이터를 사용
-        List<Long> mockUserIds = Arrays.asList(1L, 2L, 3L, 4L, 5L); // userId 하드 코딩
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneId.of("Asia/Seoul")).truncatedTo(ChronoUnit.MINUTES).plusMinutes(10);
+        List<NotificationSchedule> schedules = scheduleRepository.findBySendTime(scheduledTime);
 
-        // FCM 서비스로 userId 리스트를 전달하여 알림 전송
-        String title = "🥳 페스티벌 시작 10분 전!";
-        String body = "곧 페스티벌이 시작됩니다. 준비하세요!";
-        fcmService.sendMessageToUsers(mockUserIds, title, body);
+        if (schedules.isEmpty()) {
+            log.info("ℹ️ 해당 시간에 발송될 예약 알림이 없습니다.");
+            return;
+        }
 
-        // TODO: Reservation API 완성 시, WebClient 주입 및 API 호출 로직을 추가할 것
-        /*
-        // 이 부분은 Reservation API 완성 후 다시 추가
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime reservationTime = now.plusMinutes(10);
-        Long festivalId = 1L;
+        schedules.forEach(schedule -> {
+            // Booking MSA에 보낼 요청 DTO 생성
+            BookingRequestDTO requestDTO = new BookingRequestDTO(
+                    schedule.getFid(),
+                    schedule.getStartAt()
+            );
 
-        webClient.get()
-                .uri(reservationServiceUrl + "/api/reservations/festival/{festivalId}/users?startAt={startAt}", festivalId, reservationTime)
-                .retrieve()
-                .bodyToFlux(Long.class)
-                .collectList()
-                .doOnSuccess(userIds -> {
-                    if (userIds.isEmpty()) {
-                        log.info("ℹ️ 해당 시간에 예약된 사용자가 없습니다.");
-                        return;
-                    }
-                    log.info("✅ Reservation MSA로부터 받은 userId 리스트: {}", userIds);
+            // Booking MSA API 호출
+            bookingWebClient.post()
+                    .uri("/api/host/list")
+                    .body(Mono.just(requestDTO), BookingRequestDTO.class)
+                    .retrieve()
+                    // ▼▼▼ Long 목록을 받도록 명시하는 핵심 코드 ▼▼▼
+                    .bodyToMono(new ParameterizedTypeReference<SuccessResponse<List<Long>>>() {})
+                    .publishOn(Schedulers.boundedElastic())
+                    .doOnSuccess(response -> {
+                        if (response.isSuccess()) {
+                            log.info("✅ Booking MSA에서 예매자 정보 수신 성공. 사용자 수: {}", response.getData().size());
 
-                    fcmService.sendMessageToUsers(userIds, title, body);
-                })
-                .doOnError(error -> log.error("❌ Reservation MSA API 호출 중 오류 발생: {}", error.getMessage()))
-                .subscribe();
-        */
+                            // Long 타입의 userId 리스트를 BookingInfoDTO 리스트로 변환
+                            List<BookingInfoDTO> bookingInfos = response.getData().stream()
+                                    .map(userId -> new BookingInfoDTO(
+                                            userId,
+                                            schedule.getFid(),
+                                            schedule.getTitle(),
+                                            schedule.getBody()
+                                    ))
+                                    .collect(Collectors.toList());
+
+                            // 변환된 DTO 목록을 NotificationService로 전달
+                            notificationService.sendNotifications(bookingInfos);
+                        } else {
+                            log.error("❌ Booking MSA에서 예매자 정보 수신 실패: {}", response.getMessage());
+                        }
+                    })
+                    .doOnError(throwable -> log.error("❌ Booking MSA API 호출 중 오류 발생: {}", throwable.getMessage(), throwable))
+                    .subscribe();
+        });
+    }
+
+    // Booking MSA에 보내는 요청 DTO (내부 클래스로 유지)
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BookingRequestDTO {
+        private String festivalId;
+        private LocalDateTime performanceDate;
+    }
+
+    // Booking MSA에서 받는 응답 DTO (내부 클래스로 유지)
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SuccessResponse<T> {
+        private boolean success;
+        private T data;
+        private String message;
     }
 }

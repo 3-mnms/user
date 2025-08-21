@@ -26,7 +26,7 @@ public class FcmToken {
     private Long tokenId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false) // ✅ JoinColumn 수정
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
     @Column(length = 255, nullable = false)
