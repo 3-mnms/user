@@ -12,8 +12,10 @@ import java.util.Optional;
 
 public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
+    // 특정 사용자의 FCM 토큰을 조회
     Optional<FcmToken> findByUser(User user);
 
-    @Query("select distinct t.token from FcmToken t where t.user.userId in :userIds")
+    // 주어진 사용자 ID 목록에 해당하는 모든 FCM 토큰 문자열을 조회
+    @Query("select t.token from FcmToken t where t.user.userId in :userIds")
     List<String> findTokensByUserIds(@Param("userIds") Collection<Long> userIds);
 }

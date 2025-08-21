@@ -10,7 +10,8 @@ import jakarta.validation.constraints.Size;
 @Table(
         name = "notification_schedules",
         uniqueConstraints = {
-                @UniqueConstraint( // 동일 회차·동일 발송시각 중복 방지
+                // 동일 회차·동일 발송시각 중복 방지
+                @UniqueConstraint(
                         name = "uk_fid_start_send",
                         columnNames = {"fid", "start_at", "send_time"}
                 )
@@ -41,7 +42,7 @@ public class NotificationSchedule {
     @Size(max = 20, message = "제목은 20자 이내여야 합니다.")
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 50)
     @Size(max = 50, message = "내용은 50자 이내여야 합니다.")
     private String body;
 

@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    //특정 사용자의 알림을 최신순으로 조회
+    // 특정 사용자의 알림 목록을 최신순(보낸 날짜 기준)으로 정렬하여 조회
     List<Notification> findByUserIdOrderBySentAtDesc(Long userId);
 }

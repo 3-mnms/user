@@ -1,4 +1,4 @@
-package com.tekcit.festival.domain.host_admin.service;
+package com.tekcit.festival.domain.host_admin.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

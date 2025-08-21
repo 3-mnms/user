@@ -1,6 +1,7 @@
 package com.tekcit.festival.config.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,10 +24,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -37,7 +40,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 이 빈은 AuthService와 같은 내부 서비스에서 로그인 처리에 필요합니다.
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -67,9 +69,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // 게이트웨이에서 전달받은 헤더를 처리하는 필터만 추가합니다.
+                // 게이트웨이에서 전달받은 헤더를 처리하는 필터 추가
                 .addFilterBefore(gatewayHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }
@@ -80,22 +81,40 @@ public class SecurityConfig {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
                     throws ServletException, IOException {
-                String userId = request.getHeader("X-User-Id");
-                String userRole = request.getHeader("X-User-Role");
-                String userName = request.getHeader("X-User-Name");
 
-                if (userId != null && userRole != null) {
-                    Set<GrantedAuthority> authorities = new HashSet<>();
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.toUpperCase()));
+                final String userIdHeader = request.getHeader("X-User-Id");
+                final String userRoleHeader = request.getHeader("X-User-Role");
+                final String userNameHeader = request.getHeader("X-User-Name");
 
-                    // 인증 정보에 userId와 userName을 담아서 SecurityContext에 저장
+                // 헤더가 없거나, 인증이 이미 설정된 경우 필터를 건너뛰기
+                if (userIdHeader == null || userRoleHeader == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                // userId가 숫자인지 안전하게 검증하고 파싱합니다.
+                try {
+                    Long userId = Long.parseLong(userIdHeader);
+                    Set<GrantedAuthority> authorities = Arrays.stream(userRoleHeader.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .map(String::toUpperCase)
+                            .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r)
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toSet());
+
+                    // Principal에 Long 타입 대신 String으로 userId를 저장
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userName, null, authorities);
+                            String.valueOf(userId), null, authorities);
 
                     // user-id를 principal에 담아 컨트롤러에서 사용할 수 있도록 설정
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                } catch (NumberFormatException e) {
+                    // userId가 유효한 숫자가 아닐 경우 경고를 기록하고 인증을 설정하지 않고 통과
+                    log.warn("[HeaderAuth] 유효하지 않은 X-User-Id 헤더: " + userIdHeader);
                 }
 
                 filterChain.doFilter(request, response);

@@ -107,7 +107,7 @@ public class NotificationScheduleServiceImpl implements NotificationScheduleServ
 
     @Override
     public List<NotificationScheduleResponseDTO> getByFestival(String fid) {
-        // ✅ fid로 변경된 메서드 호출
+        // fid로 변경된 메서드 호출
         return scheduleMapper.toDtoList(
                 scheduleRepository.findAllByFidOrderBySendTimeDesc(fid)
         );

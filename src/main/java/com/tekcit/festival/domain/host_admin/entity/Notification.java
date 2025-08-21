@@ -5,9 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * 알림 정보를 저장하는 엔티티
- */
 @Entity
 @Getter
 @Builder
@@ -18,7 +15,7 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long nid;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -34,4 +31,9 @@ public class Notification {
 
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.sentAt = LocalDateTime.now();
+    }
 }
