@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.request.*;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserService;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import com.tekcit.festival.exception.global.ErrorResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -171,10 +171,62 @@ public class UserController {
         return ApiResponseUtil.success(updateUserDTO);
     }
 
+    @PostMapping(value="/checkPassword")
+    @Operation(summary = "마이페이지 기존 비밀번호 일치 여부 확인",
+            description = "마이페이지에서 기존 비밀번호 일치 여부를 확인할 수 있습니다. CheckPwDTO(기존 비밀번호)를 포함해야 합니다. ex) POST /api/users/checkPassword")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<Void>> checkPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody CheckPwDTO checkPwDTO){
+        userService.checkPassword(userDetails.getUser().getUserId(), checkPwDTO);
+        return ApiResponseUtil.success(null, "비밀번호가 일치합니다.");
+    }
+
+    @PatchMapping(value="/resetPassword")
+    @Operation(summary = "마이페이지 비밀번호 재설정",
+            description = "마이페이지에서 비밀번호를 변경할 수 있습니다. ResetPwDTO(새로운 비밀번호)를 포함해야 합니다. ex) PATCH /api/users/resetPassword")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "새로운 비밀번호 재설정",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+    })
+    public ResponseEntity<SuccessResponse<Void>> resetPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ResetPwDTO resetPwDTO){
+        userService.resetPassword(userDetails.getUser().getUserId(), resetPwDTO);
+        return ApiResponseUtil.success(null, "비밀번호를 수정했습니다.");
+    }
+
     @PostMapping(value = "/reservationList")
+    @Operation(summary = "예매자 정보 조회",
+            description = "예매자 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/reservationList")
     public ResponseEntity<SuccessResponse<List<ReservationUserDTO>>> getReservationUserInfo(@RequestBody List<Long> userIds){
         List<ReservationUserDTO> reservationUserDTOS = userService.getReservationUserInfo(userIds);
         return ApiResponseUtil.success(reservationUserDTOS);
     }
+
+    @PostMapping(value = "/statistics")
+    @Operation(summary = "통계 정보 조회",
+            description = "통계 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/statistics")
+    public ResponseEntity<SuccessResponse<List<StatisticsDTO>>> getStatisticsInfo(@RequestBody List<Long> userIds){
+        List<StatisticsDTO> statisticsDTOS = userService.getStatisticsInfo(userIds);
+        return ApiResponseUtil.success(statisticsDTOS);
+    }
+
+    @GetMapping(value = "/preReservation")
+    @Operation(summary = "가예매자 정보 조회",
+            description = "가예매자 정보 조회. ex) POST /api/users/preReservation")
+    public ResponseEntity<SuccessResponse<PreReservationDTO>> getPreReservation(@AuthenticationPrincipal CustomUserDetails userDetails){
+        PreReservationDTO preReservationDTO = userService.getPreReservation(userDetails.getUser().getUserId());
+        return ApiResponseUtil.success(preReservationDTO);
+    }
+
+    @GetMapping(value = "/assignment")
+    @Operation(summary = "가예매자 정보 조회",
+            description = "가예매자 정보 조회. ex) GET /api/users/assignment?email=test@test.com")
+    public ResponseEntity<SuccessResponse<AssignmentDTO>> getAssignmentUserInfo(@RequestParam String email){
+        AssignmentDTO assignmentDTO = userService.getAssignmentUserInfo(email);
+        return ApiResponseUtil.success(assignmentDTO);
+    }
+
+
 
 }
