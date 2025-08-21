@@ -19,9 +19,6 @@ public class HostProfile {
     @Column(name = "b_name", nullable = false)
     private String businessName;
 
-    @Column(name = "genre")
-    private String genre;
-
     @Column(name = "isActive", nullable = false)
     @Builder.Default
     private boolean isActive = true;

@@ -65,7 +65,8 @@ public class SecurityConfig {
                                 "/api/auth/kakao/**",
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
-                                "/api/users/resetPasswordWithEmail"
+                                "/api/users/resetPasswordWithEmail",
+                                "/api/users/reservationList"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

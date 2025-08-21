@@ -111,8 +111,8 @@ public class UserController {
     }
 
     @GetMapping(value="/booking-profile/{userId}")
-    @Operation(summary = "예약자 정보",
-            description = "예약자 정보, ex) GET /api/users/booking-profile/{userId}")
+    @Operation(summary = "예매 시 사용자 정보",
+            description = "예매 시 사용자 정보(email), ex) GET /api/users/booking-profile/{userId}")
     public ResponseEntity<SuccessResponse<BookingProfileDTO>> bookingProfile(@Valid @PathVariable Long userId){
         BookingProfileDTO bookingProfile = userService.bookingProfile(userId);
         return ApiResponseUtil.success(bookingProfile);
@@ -184,8 +184,10 @@ public class UserController {
         return ApiResponseUtil.success(updateUserDTO);
     }
 
-
-
-
+    @PostMapping(value = "/reservationList")
+    public ResponseEntity<SuccessResponse<List<ReservationUserDTO>>> getReservationUserInfo(@RequestBody List<Long> userIds){
+        List<ReservationUserDTO> reservationUserDTOS = userService.getReservationUserInfo(userIds);
+        return ApiResponseUtil.success(reservationUserDTOS);
+    }
 
 }

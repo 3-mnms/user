@@ -20,13 +20,9 @@ public class HostProfileDTO {
     @NotBlank(message = "사업명은 필수 입력사항 입니다.")
     private String businessName;
 
-    @Schema(description = "주최측 행사 장르")
-    private String genre;
-
     public HostProfile toEntity(){
         return HostProfile.builder()
                 .businessName(businessName)
-                .genre(genre)
                 .build();
     }
 }
