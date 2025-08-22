@@ -99,7 +99,8 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
     })
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         userService.deleteUser(userId);
         ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
 

@@ -21,7 +21,10 @@ import java.util.List;
 public class AdminService {
     private final UserRepository userRepository;
 
-    public List<AdminUserListDTO> getAllUser(User adminUser) {
+    public List<AdminUserListDTO> getAllUser(Long userId) {
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -34,7 +37,10 @@ public class AdminService {
         return userListDTOS;
     }
 
-    public List<AdminHostListDTO> getAllHost(User adminUser) {
+    public List<AdminHostListDTO> getAllHost(Long userId) {
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -49,7 +55,10 @@ public class AdminService {
     }
 
     @Transactional
-    public void changeState(Long userId, boolean active, User adminUser){
+    public void changeState(Long userId, boolean active, Long adminId){
+        User adminUser = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -75,7 +84,10 @@ public class AdminService {
     }
 
     @Transactional
-    public void deleteHost(User adminUser, Long userId){
+    public void deleteHost(Long adminId, Long userId){
+        User adminUser = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
