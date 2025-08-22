@@ -51,8 +51,15 @@ public class UserInfoService {
         return PreReservationDTO.fromUserEntity(findUser);
     }
 
-    public AssignmentDTO getAssignmentUserInfo(String email){
+    public AssignmentDTO transfereeInfo(String email){
         User findUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return AssignmentDTO.fromUserEntity(findUser);
+    }
+
+    public AssignmentDTO transferorInfo(Long userId){
+        User findUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return AssignmentDTO.fromUserEntity(findUser);

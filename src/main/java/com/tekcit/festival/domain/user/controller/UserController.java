@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import com.tekcit.festival.exception.global.ErrorResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,11 +35,7 @@ public class UserController {
             description = "일반 유저 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupUser")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(일반 유저)",
-                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "회원 가입 실패 (잘못된 데이터, 필수 필드 누락)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
     })
     public ResponseEntity<SuccessResponse<UserResponseDTO>> signupUser(@Valid @RequestBody SignupUserDTO signupUserDTO){
         UserResponseDTO signupUser = userService.signupUser(signupUserDTO);
@@ -51,12 +47,9 @@ public class UserController {
             description = "축제 주최측 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupHost")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(축제 주최측)",
-                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
-            @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<UserResponseDTO>> signupHost(@Valid @RequestBody SignupUserDTO signupUserDTO){
         UserResponseDTO signupHost = userService.signupHost(signupUserDTO);
         return ApiResponseUtil.success(signupHost);
@@ -67,11 +60,7 @@ public class UserController {
             description = "운영 관리자 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/users/signupAdmin")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 가입 성공(운영 관리자)",
-                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
-            @ApiResponse(responseCode = "400", description = "회원 가입 실패 (필수 필드 누락)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
     })
     public ResponseEntity<SuccessResponse<UserResponseDTO>> signupAdmin(@Valid @RequestBody SignupUserDTO signupUserDTO){
         UserResponseDTO signupAdmin = userService.signupAdmin(signupUserDTO);
@@ -81,6 +70,10 @@ public class UserController {
     @GetMapping(value="/checkLoginId")
     @Operation(summary = "로그인 아이디 중복 확인",
             description = "로그인 아이디 중복 확인, ex) GET /api/users/checkLoginId?loginId=test")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 아이디 중복 체크(true면 중복 아님, false면 중복)",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
+    })
     public ResponseEntity<SuccessResponse<Boolean>> checkLoginId(@RequestParam String loginId){
         boolean isLoginIdAvailable = userService.checkLoginId(loginId);
         return ApiResponseUtil.success(isLoginIdAvailable);
@@ -89,12 +82,23 @@ public class UserController {
     @GetMapping(value="/checkEmail")
     @Operation(summary = "이메일 주소 중복 확인",
             description = "이메일 주소 중복 확인, ex) GET /api/users/checkEmail?email=test@test.com")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 주소 중복 체크(true면 중복 아님, false면 중복)",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
+    })
     public ResponseEntity<SuccessResponse<Boolean>> checkEmail(@RequestParam String email){
         boolean isEmailAvailable = userService.checkEmail(email);
         return ApiResponseUtil.success(isEmailAvailable);
     }
 
     @DeleteMapping
+    @Operation(summary = "일반 회원 탈퇴",
+            description = "일반 회원 탈퇴, ex) DELETE /api/users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공",
+                    content = @Content(schema = @Schema(implementation = SuccessResponse.class)))
+    })
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal(expression = "user.userId") Long userId){
         userService.deleteUser(userId);
         ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
@@ -128,15 +132,15 @@ public class UserController {
         return ApiResponseUtil.success(email);
     }
 
-    @PatchMapping(value="/resetPasswordWithEmail")
+    @PatchMapping(value="/resetPasswordEmail")
     @Operation(summary = "비밀번호 재설정",
-            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) PATCH /api/users/resetPasswordWithEmail")
+            description = "로그인 비밀번호 찾기 2단계, FindPwResetDTO(로그인아이디, 이메일, 새로운 비밀번호)를 포함해야 합니다. ex) PATCH /api/users/resetPasswordEmail")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 후 새로운 비밀번호 재설정",
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
     })
-    public ResponseEntity<SuccessResponse<Void>> resetPasswordWithEmail(@Valid @RequestBody FindPwResetDTO findPwResetDTO){
-        userService.resetPasswordWithEmail(findPwResetDTO);
+    public ResponseEntity<SuccessResponse<Void>> resetPasswordEmail(@Valid @RequestBody FindPwResetDTO findPwResetDTO){
+        userService.resetPasswordEmail(findPwResetDTO);
         return ApiResponseUtil.success();
     }
 }

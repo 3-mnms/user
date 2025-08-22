@@ -19,7 +19,7 @@ public class HostProfile {
     @Column(name = "b_name", nullable = false)
     private String businessName;
 
-    @Column(name = "isActive", nullable = false)
+    @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
 

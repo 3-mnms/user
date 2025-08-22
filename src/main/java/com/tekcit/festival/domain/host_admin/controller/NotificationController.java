@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +27,17 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    // 공통 로직을 별도의 메서드로 분리
+    private Long getUserIdFromSecurityContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return Long.parseLong(authentication.getName());
+    }
+
     @Operation(summary = "알림 히스토리 전체 조회", description = "사용자는 자신이 수신한 알림 목록을 보낸 날짜를 기준으로 최신순으로 조회할 수 있습니다.")
     @GetMapping("/history")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<List<NotificationListDTO>>> getUserNotifications() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromSecurityContext();
 
         List<NotificationResponseDTO> notifications = notificationService.getUserNotifications(userId);
         List<NotificationListDTO> notificationList = notifications.stream()
@@ -42,9 +49,9 @@ public class NotificationController {
 
     @Operation(summary = "알림 상세 조회", description = "특정 알림의 모든 상세 정보를 조회합니다. (제목, 내용, 날짜 등)")
     @GetMapping("/{nid}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<NotificationResponseDTO>> getNotificationDetail(@PathVariable("nid") Long nid) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromSecurityContext();
 
         NotificationResponseDTO responseDTO = notificationService.getNotificationDetail(nid, userId);
         return ResponseEntity.ok(new SuccessResponse<>(true, responseDTO, "알림 상세 정보를 성공적으로 조회했습니다."));
