@@ -88,7 +88,7 @@ public class SecurityConfig {
         c.setAllowedOrigins(List.of(
                 "http://localhost:5173",// React dev
                 "http://localhost:5174",
-                "http://localhost:8080"    // (필요시) 같은 포트에서 테스트용
+                "http://localhost:10000"    // (필요시) 같은 포트에서 테스트용
         ));
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("*"));

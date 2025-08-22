@@ -25,7 +25,7 @@ public class AddressController {
 
     @PostMapping
     @Operation(summary = "회원 주소 정보 추가",
-            description = "회원 주소 정보 추가, AddressRequestDTO를 포함해야 합니다. ex) POST /api/addresses/addAddress")
+            description = "회원 주소 정보 추가, AddressRequestDTO를 포함해야 합니다. ex) POST /api/addresses")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> addAddress(@Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -35,7 +35,7 @@ public class AddressController {
 
     @PatchMapping(value="/updateAddress/{addressId}")
     @Operation(summary = "회원 주소 정보 수정",
-            description = "회원 주소 정보 수정, AddressRequestDTO를 포함해야 합니다. ex) PATCH /api/addresses/updateAddress")
+            description = "회원 주소 정보 수정, AddressRequestDTO를 포함해야 합니다. ex) PATCH /api/addresses/updateAddress/{addressId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> updateAddress(@PathVariable Long addressId, @Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
