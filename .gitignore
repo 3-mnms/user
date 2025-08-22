@@ -55,3 +55,5 @@ src/main/resources/application-prod.properties
 
 src/main/resources/keys/private.pem
 **/private.pem
+
+src/main/resources/firebase/firebase-adminsdk.json
