@@ -6,9 +6,11 @@ import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +26,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class SecurityConfig {
 
@@ -52,21 +55,23 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/users/signupUser",
-                                "/api/users/signupHost",
                                 "/api/users/signupAdmin",
-                                "/api/users/login",
-                                "/api/users/reissue",
-                                "/api/users/checkLoginId",
-                                "/api/users/checkEmail",
-                                "/api/users/token/parse",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api/mail/**",
-                                "/api/auth/kakao/**",
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
-                                "/api/users/resetPasswordWithEmail",
-                                "/api/users/reservationList"
+                                "/api/users/resetPasswordEmail",
+                                "/api/users/login",
+                                "/api/auth/kakao/signupUser"
+                                ).anonymous()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/users/checkLoginId",
+                                "/api/users/checkEmail",
+                                "/api/users/reissue",
+                                "/api/mail/**",
+                                "/api/auth/kakao/**",
+                                "/api/users/booking-profile/**",
+                                "/api/users/statisticsList"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -81,7 +86,8 @@ public class SecurityConfig {
         CorsConfiguration c = new CorsConfiguration();
         // 프론트 오리진들 추가 (dev/prod 맞춰서)
         c.setAllowedOrigins(List.of(
-                "http://localhost:5173",   // React dev
+                "http://localhost:5173",// React dev
+                "http://localhost:5174",
                 "http://localhost:8080"    // (필요시) 같은 포트에서 테스트용
         ));
         c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));

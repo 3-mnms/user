@@ -76,7 +76,6 @@ public class UserService {
         validateDuplicate(signupUserDTO);
         User user = signupUserDTO.toAdminEntity();
         user.setLoginPw(passwordEncoder.encode(user.getLoginPw()));
-        user.setOauthProvider(OAuthProvider.LOCAL);
 
         userRepository.save(user);
         return UserResponseDTO.fromEntity(user);
@@ -123,7 +122,7 @@ public class UserService {
     }
 
     @Transactional
-    public void resetPasswordWithEmail(FindPwResetDTO findPwResetDTO){
+    public void resetPasswordEmail(FindPwResetDTO findPwResetDTO){
         User findUser = userRepository.findByLoginId(findPwResetDTO.getLoginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 

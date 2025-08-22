@@ -38,7 +38,7 @@ public class UserProfile {
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
-    @Column(name = "isActive", nullable = false)
+    @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
 
