@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.entity;
 
 import com.tekcit.festival.domain.user.enums.UserGender;
+import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -51,6 +52,13 @@ public class UserProfile {
 
     public void activate() {
         this.isActive = true;
+    }
+
+    public void updateResidentInfo(String residentNum) {
+        this.residentNum = residentNum;
+        this.age = ResidentUtil.calcAge(residentNum);
+        this.birth = ResidentUtil.calcBirth(residentNum);
+        this.gender = ResidentUtil.extractGender(residentNum);
     }
 }
 

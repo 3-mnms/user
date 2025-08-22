@@ -11,8 +11,8 @@ public class CookieUtil {
     public ResponseCookie createRefreshTokenCookie(String refreshToken) {
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(15 * 24 * 60 * 60) //15일
                 .build();
@@ -21,8 +21,8 @@ public class CookieUtil {
     public ResponseCookie deleteRefreshTokenCookie() {
         return ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -38,6 +38,26 @@ public class CookieUtil {
             }
         }
         return null;
+    }
+
+    public ResponseCookie createKakaoSignupCookie(String ticket) {
+        return ResponseCookie.from("kakao_signup", ticket)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(10 * 60)
+                .build();
+    }
+
+    public ResponseCookie deleteKakaoSignupCookie() {
+        return ResponseCookie.from("kakao_signup", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
     }
 
 }

@@ -14,12 +14,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Swagger 관련 요청은 이 핸들러에서 무시
-    private boolean isSwaggerRequest(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return uri.startsWith("/v3/api-docs") || uri.startsWith("/swagger-ui");
-    }
-
     @ExceptionHandler(EmailSendException.class)
     public ResponseEntity<?> handleEmailSendFailed(EmailSendException ex) {
         return ResponseEntity.status(500).body("이메일 실패: " + ex.getMessage());
@@ -31,7 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = new ErrorResponse(false, errorCode.name(), errorCode.getMessage());
+        ErrorResponse response = new ErrorResponse(false, errorCode.name(), e.getMessage());
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 

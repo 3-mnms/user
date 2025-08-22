@@ -1,6 +1,7 @@
 package com.tekcit.festival.domain.user.service;
 
-import com.tekcit.festival.config.security.CustomUserDetails;
+import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
+import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
@@ -9,6 +10,7 @@ import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.utils.CookieUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.tekcit.festival.exception.ErrorCode;
+
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -76,12 +80,12 @@ public class AuthService {
         ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        if (loginId == null)
+        if (userId == null)
             return;
 
-        userRepository.findByLoginId(loginId).ifPresent(user -> {
+        userRepository.findById(userId).ifPresent(user -> {
             user.updateRefreshToken(null);
             userRepository.save(user);
         });
@@ -97,11 +101,11 @@ public class AuthService {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
         }
 
-        //refreshToken에서 loginId 정보 get
-        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+        //refreshToken에서 userId 정보 get
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        //loginId로 user조회
-        User user = userRepository.findByLoginId(loginId)
+        //userId로 user조회
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         checkState(user);
@@ -115,6 +119,27 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(user);
 
         return LoginResponseDTO.fromToken(newAccessToken);
+    }
+
+    public AccessTokenInfoDTO parseAccessToken(Claims claims){
+        Long userId = Long.valueOf(claims.getSubject());
+        String role = claims.get("role", String.class);
+        String name = claims.get("name", String.class);
+
+        Date issuedAt = claims.getIssuedAt();
+        Date expiresAt = claims.getExpiration();
+
+        long nowMs = System.currentTimeMillis();
+        boolean isExpired = (expiresAt != null) && (expiresAt.getTime() <= nowMs);
+
+        return AccessTokenInfoDTO.builder()
+                .userId(userId)
+                .role(role)
+                .name(name)
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
+                .isExpired(isExpired)
+                .build();
     }
 
     public void checkState(User user){

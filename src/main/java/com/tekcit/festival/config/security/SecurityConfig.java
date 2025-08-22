@@ -1,11 +1,13 @@
 package com.tekcit.festival.config.security;
 
+import com.tekcit.festival.config.security.userdetails.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,15 +21,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Slf4j
 @Configuration
@@ -48,6 +55,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
@@ -62,14 +70,19 @@ public class SecurityConfig {
                                 "/api/users/reissue",
                                 "/api/users/checkLoginId",
                                 "/api/users/checkEmail",
+                                "/api/users/token/parse",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/mail/**",
-                                "/api/auth/kakao/**"
+                                "/api/auth/kakao/**",
+                                "/api/users/findLoginId",
+                                "/api/users/findRegisteredEmail",
+                                "/api/users/resetPasswordWithEmail",
+                                "/api/users/reservationList",
+                                "/api/users/fcm-token" // FCM 토큰 발급 API는 인증 없이 접근 가능하도록 수정
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // 게이트웨이에서 전달받은 헤더를 처리하는 필터 추가
                 .addFilterBefore(gatewayHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -120,5 +133,23 @@ public class SecurityConfig {
                 filterChain.doFilter(request, response);
             }
         };
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration c = new CorsConfiguration();
+        // 프론트 오리진들 추가 (dev/prod 맞춰서)
+        c.setAllowedOrigins(List.of(
+                "http://localhost:5173",   // React dev
+                "http://localhost:8080"    // (필요시) 같은 포트에서 테스트용
+        ));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        c.setAllowedHeaders(List.of("*"));
+        c.setAllowCredentials(true); // ★ 쿠키 주고받기 허용
+        c.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
+        s.registerCorsConfiguration("/**", c);
+        return s;
     }
 }

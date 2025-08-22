@@ -1,4 +1,4 @@
-package com.tekcit.festival.config.security;
+package com.tekcit.festival.config.security.userdetails;
 
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.enums.UserRole;
