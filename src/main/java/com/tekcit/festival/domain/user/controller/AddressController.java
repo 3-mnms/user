@@ -27,7 +27,8 @@ public class AddressController {
     @Operation(summary = "회원 주소 정보 추가",
             description = "회원 주소 정보 추가, AddressRequestDTO를 포함해야 합니다. ex) POST /api/addresses/addAddress")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<SuccessResponse<AddressDTO>> addAddress(@Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<AddressDTO>> addAddress(@Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         AddressDTO addressDTO = addressService.addAddress(addressRequestDTO, userId);
         return ApiResponseUtil.success(addressDTO);
     }
@@ -36,7 +37,8 @@ public class AddressController {
     @Operation(summary = "회원 주소 정보 수정",
             description = "회원 주소 정보 수정, AddressRequestDTO를 포함해야 합니다. ex) PATCH /api/addresses/updateAddress")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<SuccessResponse<AddressDTO>> updateAddress(@PathVariable Long addressId, @Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<AddressDTO>> updateAddress(@PathVariable Long addressId, @Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         AddressDTO addressDTO = addressService.updateAddress(addressId, addressRequestDTO, userId);
         return ApiResponseUtil.success(addressDTO);
     }
@@ -45,7 +47,8 @@ public class AddressController {
     @Operation(summary = "회원 주소 기본 배송지 수정",
             description = "회원 주소 기본 배송지 수정, ex) PATCH /api/addresses/changeDefault/{addressId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<SuccessResponse<AddressDTO>> updateDefault(@PathVariable Long addressId, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<AddressDTO>> updateDefault(@PathVariable Long addressId, @AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         AddressDTO addressDTO = addressService.updateDefault(addressId, userId);
         return ApiResponseUtil.success(addressDTO);
     }
@@ -54,7 +57,8 @@ public class AddressController {
     @Operation(summary = "회원 주소 삭제",
             description = "회원 주소 삭제, ex) DELETE /api/addresses/deleteAddress/{addressId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId, @AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         addressService.deleteAddress(addressId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -63,7 +67,8 @@ public class AddressController {
     @Operation(summary = "회원 주소 정보 조회",
             description = "회원 주소 정보 조회 ex) GET /api/addresses")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAddresses(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAddresses(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         List<AddressDTO> addressDTOS = addressService.getAddresses(userId);
         return ApiResponseUtil.success(addressDTOS);
     }

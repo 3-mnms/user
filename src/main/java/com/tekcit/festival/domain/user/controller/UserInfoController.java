@@ -52,8 +52,9 @@ public class UserInfoController {
     @GetMapping(value = "/preReservation")
     @Operation(summary = "가예매자 정보 조회",
             description = "가예매자 정보 조회. ex) POST /api/users/preReservation")
-    public ResponseEntity<SuccessResponse<PreReservationDTO>> getPreReservationInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
-        PreReservationDTO preReservationDTO = userInfoService.getPreReservationInfo(userDetails.getUser().getUserId());
+    public ResponseEntity<SuccessResponse<PreReservationDTO>> getPreReservationInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        PreReservationDTO preReservationDTO = userInfoService.getPreReservationInfo(userId);
         return ApiResponseUtil.success(preReservationDTO);
     }
 
@@ -68,8 +69,9 @@ public class UserInfoController {
     @GetMapping(value = "/transferor")
     @Operation(summary = "양도 시 현재 양도자 정보 조회",
             description = "양도 시 현재 양도자 정보 조회. ex) GET /api/users/transferor?email=test@test.com")
-    public ResponseEntity<SuccessResponse<AssignmentDTO>> transferorInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
-        AssignmentDTO assignmentDTO = userInfoService.transferorInfo(userDetails.getUser().getUserId());
+    public ResponseEntity<SuccessResponse<AssignmentDTO>> transferorInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        AssignmentDTO assignmentDTO = userInfoService.transferorInfo(userId);
         return ApiResponseUtil.success(assignmentDTO);
     }
 
