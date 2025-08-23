@@ -66,7 +66,7 @@ public class AddressController {
     @GetMapping
     @Operation(summary = "회원 주소 정보 조회",
             description = "회원 주소 정보 조회 ex) GET /api/addresses")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAddresses(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
         List<AddressDTO> addressDTOS = addressService.getAddresses(userId);
