@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                //.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
@@ -58,11 +57,10 @@ public class SecurityConfig {
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
                                 "/api/users/reservationList",
-                                //"/api/users/fcm-token",
                                 "/api/users/resetPasswordEmail",
                                 "/api/users/login",
                                 "/api/auth/kakao/signupUser"
-                                ).anonymous()
+                        ).anonymous()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -74,6 +72,7 @@ public class SecurityConfig {
                                 "/api/users/booking-profile/**",
                                 "/api/users/statisticsList"
                         ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users/fcm-token").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(headerAuthFilter, AuthorizationFilter.class);
@@ -88,7 +87,8 @@ public class SecurityConfig {
         c.setAllowedOrigins(List.of(
                 "http://localhost:5173",// React dev
                 "http://localhost:5174",
-                "http://localhost:8080"    // (필요시) 같은 포트에서 테스트용
+                "http://localhost:8080",
+                "http://localhost:3000"
         ));
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("*"));

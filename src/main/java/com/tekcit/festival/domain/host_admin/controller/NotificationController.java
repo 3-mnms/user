@@ -41,14 +41,14 @@ public class NotificationController {
 
         List<NotificationResponseDTO> notifications = notificationService.getUserNotifications(userId);
         List<NotificationListDTO> notificationList = notifications.stream()
-                .map(n -> new NotificationListDTO(n.getNid(), n.getSentAt()))
+                .map(n -> new NotificationListDTO(n.getTitle(), n.getSentAt()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new SuccessResponse<>(true, notificationList, "알림 목록을 성공적으로 조회했습니다."));
     }
 
     @Operation(summary = "알림 상세 조회", description = "특정 알림의 모든 상세 정보를 조회합니다. (제목, 내용, 날짜 등)")
-    @GetMapping("/{nid}")
+    @GetMapping("/history/{nid}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<NotificationResponseDTO>> getNotificationDetail(@PathVariable("nid") Long nid) {
         Long userId = getUserIdFromSecurityContext();

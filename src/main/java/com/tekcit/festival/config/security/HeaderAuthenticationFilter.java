@@ -85,6 +85,13 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(String.valueOf(userId), null, authorities);
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
+
+            // principal을 **Long**으로 세팅
+            /*UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+             */
         }
 
         chain.doFilter(request, response);
@@ -94,5 +101,12 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
         if (s == null) return null;
         String t = s.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        return "OPTIONS".equals(method) || path.startsWith("/actuator");
     }
 }

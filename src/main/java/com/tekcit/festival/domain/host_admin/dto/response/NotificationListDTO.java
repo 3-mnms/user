@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "알림 목록 조회 응답 DTO")
 public class NotificationListDTO {
-    @Schema(description = "알림 ID", example = "1")
-    private Long nid;
+    @Schema(description = "알림 제목", example = "공연 시작 10분 전!")
+    private String title;
+
     @Schema(description = "알림 발송 시각", example = "2024-12-25T18:00:00")
     private LocalDateTime sentAt;
 }
