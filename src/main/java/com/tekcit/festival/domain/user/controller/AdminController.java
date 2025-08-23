@@ -1,9 +1,8 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
+import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminHostListDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminUserListDTO;
-import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.service.AdminService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
@@ -73,4 +72,13 @@ public class AdminController {
         return ApiResponseUtil.success(null, "주최측 탈퇴 완료");
     }
 
+    @GetMapping
+    @Operation(summary = "전체 회원 주소 정보 조회",
+            description = "회원 주소 정보 조회 ex) GET /api/admin/addresses")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAllAddresses(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        List<AddressDTO> addressDTOS = adminService.getAllAddresses(userId);
+        return ApiResponseUtil.success(addressDTOS);
+    }
 }

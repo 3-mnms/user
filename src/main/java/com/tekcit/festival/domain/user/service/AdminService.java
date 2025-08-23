@@ -2,9 +2,11 @@ package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.*;
+import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
+import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
@@ -20,6 +22,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class AdminService {
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
 
     public List<AdminUserListDTO> getAllUser(Long userId) {
         User adminUser = userRepository.findById(userId)
@@ -101,6 +104,19 @@ public class AdminService {
         }
 
         userRepository.delete(deleteUser);
+    }
+
+    public List<AddressDTO> getAllAddresses(Long userId){
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Address> addresses = addressRepository.findAll();
+
+        List<AddressDTO> addressDTOS = addresses.stream()
+                .map(address->AddressDTO.fromEntity(address))
+                .toList();
+
+        return addressDTOS;
     }
 
 }

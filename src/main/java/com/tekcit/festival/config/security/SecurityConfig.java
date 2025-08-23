@@ -57,7 +57,6 @@ public class SecurityConfig {
                                 "/api/users/signupAdmin",
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
-                                "/api/users/reservationList",
                                 //"/api/users/fcm-token",
                                 "/api/users/resetPasswordEmail",
                                 "/api/users/login",
