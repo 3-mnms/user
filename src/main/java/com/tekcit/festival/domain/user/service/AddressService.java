@@ -113,4 +113,12 @@ public class AddressService {
         return addressDTO;
     }
 
+    public AddressDTO getAddress(Long addressId){
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        AddressDTO addressDTO = AddressDTO.fromEntity(address);
+        return addressDTO;
+    }
+
 }
