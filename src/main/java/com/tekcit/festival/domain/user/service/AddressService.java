@@ -48,6 +48,7 @@ public class AddressService {
         address.setZipCode(addressRequestDTO.getZipCode());
         address.setName(addressRequestDTO.getName());
         address.setPhone(addressRequestDTO.getPhone());
+        address.setDefault(addressRequestDTO.isDefault());
 
         addressRepository.save(address);
         return AddressDTO.fromEntity(address);
