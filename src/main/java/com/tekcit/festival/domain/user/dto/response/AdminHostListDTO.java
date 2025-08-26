@@ -2,16 +2,11 @@ package com.tekcit.festival.domain.user.dto.response;
 
 import com.tekcit.festival.domain.user.entity.HostProfile;
 import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.entity.UserProfile;
-import com.tekcit.festival.domain.user.enums.UserGender;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Schema(description = "운영관리자 축제 주최측 전체 조회 DTO", name = "AdminHostListDTO")
 @Data
@@ -19,6 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AdminHostListDTO {
+    @Schema(description = "회원 userId")
+    private Long userId;
+
     @Schema(description = "주최측 회원 이름")
     private String name;
 
@@ -42,6 +40,7 @@ public class AdminHostListDTO {
         HostProfile hostProfile = user.getHostProfile();
 
         return AdminHostListDTO.builder()
+                .userId(user.getUserId())
                 .name(user.getName())
                 .loginId(user.getLoginId())
                 .phone(user.getPhone())
