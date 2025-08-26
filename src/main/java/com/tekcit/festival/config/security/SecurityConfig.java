@@ -71,7 +71,8 @@ public class SecurityConfig {
                                 "/api/mail/**",
                                 "/api/auth/kakao/**",
                                 "/api/users/booking-profile/**",
-                                "/api/users/statisticsList"
+                                "/api/users/statisticsList",
+                                "/api/users/reservationList"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
