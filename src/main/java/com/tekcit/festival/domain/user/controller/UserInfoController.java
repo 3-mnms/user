@@ -35,7 +35,6 @@ public class UserInfoController {
     @PostMapping(value = "/reservationList")
     @Operation(summary = "예매자 정보 조회",
             description = "예매자 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/reservationList")
-    @PreAuthorize("hasAnyRole('HOST', 'ADMIN')")
     public ResponseEntity<SuccessResponse<List<ReservationUserDTO>>> getReservationUserInfo(@RequestBody List<Long> userIds){
         List<ReservationUserDTO> reservationUserDTOS = userInfoService.getReservationUserInfo(userIds);
         return ApiResponseUtil.success(reservationUserDTOS);
