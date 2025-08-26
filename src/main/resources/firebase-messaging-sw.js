@@ -32,7 +32,7 @@ messaging.onBackgroundMessage((payload) => {
 
 // 4. FCM 토큰 발급
 messaging.getToken({
-    vapidKey: 'BFD_AQGpmHFhetKPS9Y3SKeF9j5iLdxF6v1gvMvYSCvDRRlRV3MkgpZKoPuKAd-LvkvY2cyXSuxcLkdDwoz6RdE'
+    vapidKey: 'BF5YpNLRHPs9tJiv-Se3mIj4ORE7PdZ_q761BsWXCivfkYmMYFGsR1PDNTlKKZ1ho6r3s-79LWUaYF3Px2EQu6Q'
 }).then((currentToken) => {
     if (currentToken) {
         console.log('FCM Registration Token:', currentToken);

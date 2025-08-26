@@ -39,12 +39,9 @@ public class NotificationController {
     public ResponseEntity<SuccessResponse<List<NotificationListDTO>>> getUserNotifications() {
         Long userId = getUserIdFromSecurityContext();
 
-        List<NotificationResponseDTO> notifications = notificationService.getUserNotifications(userId);
-        List<NotificationListDTO> notificationList = notifications.stream()
-                .map(n -> new NotificationListDTO(n.getTitle(), n.getSentAt()))
-                .collect(Collectors.toList());
+        List<NotificationListDTO> notificationList = notificationService.getUserNotifications(userId);
 
-        return ResponseEntity.ok(new SuccessResponse<>(true, notificationList, "알림 목록을 성공적으로 조회했습니다."));
+        return ResponseEntity.ok(new SuccessResponse<>(true, notificationList, "알림 목록을 성공적으로 조회"));
     }
 
     @Operation(summary = "알림 상세 조회", description = "특정 알림의 모든 상세 정보를 조회합니다. (제목, 내용, 날짜 등)")
@@ -54,6 +51,6 @@ public class NotificationController {
         Long userId = getUserIdFromSecurityContext();
 
         NotificationResponseDTO responseDTO = notificationService.getNotificationDetail(nid, userId);
-        return ResponseEntity.ok(new SuccessResponse<>(true, responseDTO, "알림 상세 정보를 성공적으로 조회했습니다."));
+        return ResponseEntity.ok(new SuccessResponse<>(true, responseDTO, "알림 상세 정보를 성공적으로 조회"));
     }
 }

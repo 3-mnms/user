@@ -44,15 +44,15 @@
     // 1. Firebase 설정 (Firebase 콘솔에서 복사한 값 입력)
     const firebaseConfig = {
         apiKey: "AIzaSyBJ9T7mt7CtwZm1E89qLK-1XeRitcwV-Es",
-        authDomain: "fcmtest-bd402.firebaseapp.com",
-        projectId: "fcmtest-bd402",
-        storageBucket: "fcmtest-bd402.firebasestorage.app",
-        messagingSenderId: "603915203012",
-        appId: "1:603915203012:web:fb00e2ef0dab3fb51ef491"
+         authDomain: "fcmtest-bd402.firebaseapp.com",
+         projectId: "fcmtest-bd402",
+         storageBucket: "fcmtest-bd402.firebasestorage.app",
+         messagingSenderId: "603915203012",
+         appId: "1:603915203012:web:fb00e2ef0dab3fb51ef491"
     };
 
     // TODO: Firebase 콘솔의 클라우드 메시징에서 복사한 VAPID 키를 여기에 붙여넣으세요.
-    const VAPID_KEY = "BFD_AQGpmHFhetKPS9Y3SKeF9j5iLdxF6v1gvMvYSCvDRRlRV3MkgpZKoPuKAd-LvkvY2cyXSuxcLkdDwoz6RdE";
+    const VAPID_KEY = "BF5YpNLRHPs9tJiv-Se3mIj4ORE7PdZ_q761BsWXCivfkYmMYFGsR1PDNTlKKZ1ho6r3s-79LWUaYF3Px2EQu6Q";
 
     // 2. Firebase 초기화
     firebase.initializeApp(firebaseConfig);
@@ -92,7 +92,7 @@
                         // ✅ 테스트를 위한 유저 ID (실제로는 로그인 후 동적으로 설정)
                         //"X-User-Id": "2",
                         //"X-User-Role": "USER"
-                        "Authorization": "Bearer " + "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJmZXN0aXZhbC11c2VyLXNlcnZpY2UiLCJzdWIiOiIxIiwicm9sZSI6IlVTRVIiLCJuYW1lIjoiXHVBRTMwXHVCQTc0XHVDOEZDIiwiaWF0IjoxNzU1ODU2NDA4LCJleHAiOjE4MTc1NTg1NjQwOH0.2fJ91InVP9qJ6UPZDIhzKpE_F0mFM6NYzRU6xgTerfDPSSdJOeVUYFw2lgyC2HolCj_krdnY0f2uB884LpJLWtlgyNVmWWNBV_sKHbL9MXl5778ncbP_vHbc1H1Xu-s0z8uzAw2ZBc9kByHbsEg-93ASBwfB06GBaJXrIS8-Onvmsehe7AAdqCjC-ERvK3r9B6TIdP0rXysWGyJX80A_50RFhYrnqzPQmfehqLneHio1KIxCglY2XV8yPQ0t61-yy2d5JHQ0geEhKRD700rzjPMg9wb_tDOsxBXuCD4URThmYFZdDfxwnf5Bvg7liONxqPQzSqLt3_Pi4l88Q69pjA"
+                        "Authorization": "Bearer " + "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJmZXN0aXZhbC11c2VyLXNlcnZpY2UiLCJzdWIiOiIyIiwicm9sZSI6IlVTRVIiLCJuYW1lIjoiXHVBRTQwXHVBRTM4XHVCM0Q5IiwiaWF0IjoxNzU2MTc5OTA0LCJleHAiOjE4MTc1NjE3OTkwNH0.okXFburxV7PaTJmWH0crq8PlXq_7T3SRD9qv0xnD_5wVUGT6eWemqwP5a5SaAndwn9MQLB88UC0A1EIwfrtxjZXwTcU-BTawDWaOnldyTtxRk3ZqJzUR0BGY0novkTGpoIyuHmvMKm3dtaCazPfybxDsdIHOSRFTG0SuTQOgu8RsvnU1FE8zjvHGOuRREZ4ZxWvZP3RJ8qnoXKI30_oZXS_aVgw4RNpfDGEs-igOYItzsla0_rVv0d-9g7mQbPIJ_U1sft7om9NjsbRukz89BF_A-vq6jJ7RSiqjIAsY-YQ9zczMAW9NkKRjbVqfGlVZ0doj_J83xQ50rQUtKVOytg"
                     },
                     body: JSON.stringify({ token: currentToken })
                 });
