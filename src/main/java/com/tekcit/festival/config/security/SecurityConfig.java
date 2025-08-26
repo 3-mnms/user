@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,7 +45,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                //.cors(Customizer.withDefaults())
+                .cors(AbstractHttpConfigurer::disable)
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
@@ -56,7 +57,6 @@ public class SecurityConfig {
                                 "/api/users/signupAdmin",
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
-                                "/api/users/reservationList",
                                 "/api/users/resetPasswordEmail",
                                 "/api/users/login",
                                 "/api/auth/kakao/signupUser"
@@ -70,7 +70,8 @@ public class SecurityConfig {
                                 "/api/mail/**",
                                 "/api/auth/kakao/**",
                                 "/api/users/booking-profile/**",
-                                "/api/users/statisticsList"
+                                "/api/users/statisticsList",
+                                "/api/users/reservationList"
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users/fcm-token").authenticated()
                         .anyRequest().authenticated()
@@ -78,25 +79,5 @@ public class SecurityConfig {
                 .addFilterBefore(headerAuthFilter, AuthorizationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration c = new CorsConfiguration();
-        // 프론트 오리진들 추가 (dev/prod 맞춰서)
-        c.setAllowedOrigins(List.of(
-                "http://localhost:5173",// React dev
-                "http://localhost:5174",
-                "http://localhost:8080",
-                "http://localhost:3000"
-        ));
-        c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        c.setAllowedHeaders(List.of("*"));
-        c.setAllowCredentials(true); // ★ 쿠키 주고받기 허용
-        c.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
-        s.registerCorsConfiguration("/**", c);
-        return s;
     }
 }

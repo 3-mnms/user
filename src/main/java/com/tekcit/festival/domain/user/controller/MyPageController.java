@@ -37,7 +37,8 @@ public class MyPageController {
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(oneOf = { MyPageUserDTO.class, MyPageHostDTO.class, MyPageCommonDTO.class })
     ))
-    public ResponseEntity<SuccessResponse<Object>> myPageUserInfo(@AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<Object>> myPageUserInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         Object myPageDto = myPageService.getUserInfo(userId);
         return ApiResponseUtil.success(myPageDto);
     }
@@ -45,7 +46,8 @@ public class MyPageController {
     @PatchMapping(value="/updateUser")
     @Operation(summary = "마이페이지 회원 정보 수정",
             description = "마이페이지 회원 정보 수정, UpdateUserRequestDTO를 포함해야 합니다. ex) PATCH /api/myPage/updateUser")
-    public ResponseEntity<SuccessResponse<UpdateUserResponseDTO>> updateUser(@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO, @AuthenticationPrincipal(expression = "user.userId") Long userId){
+    public ResponseEntity<SuccessResponse<UpdateUserResponseDTO>> updateUser(@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO, @AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
         UpdateUserResponseDTO updateUserDTO = myPageService.updateUser(updateUserRequestDTO, userId);
         return ApiResponseUtil.success(updateUserDTO);
     }
@@ -57,8 +59,9 @@ public class MyPageController {
             @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.",
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
     })
-    public ResponseEntity<SuccessResponse<Void>> checkPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody CheckPwDTO checkPwDTO){
-        myPageService.checkPassword(userDetails.getUser().getUserId(), checkPwDTO);
+    public ResponseEntity<SuccessResponse<Void>> checkPassword(@AuthenticationPrincipal String principal, @Valid @RequestBody CheckPwDTO checkPwDTO){
+        Long userId = Long.parseLong(principal);
+        myPageService.checkPassword(userId, checkPwDTO);
         return ApiResponseUtil.success(null, "비밀번호가 일치합니다.");
     }
 
@@ -69,8 +72,9 @@ public class MyPageController {
             @ApiResponse(responseCode = "200", description = "새로운 비밀번호 재설정",
                     content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
     })
-    public ResponseEntity<SuccessResponse<Void>> resetPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ResetPwDTO resetPwDTO){
-        myPageService.resetPassword(userDetails.getUser().getUserId(), resetPwDTO);
+    public ResponseEntity<SuccessResponse<Void>> resetPassword(@AuthenticationPrincipal String principal, @Valid @RequestBody ResetPwDTO resetPwDTO){
+        Long userId = Long.parseLong(principal);
+        myPageService.resetPassword(userId, resetPwDTO);
         return ApiResponseUtil.success(null, "비밀번호를 수정했습니다.");
     }
 

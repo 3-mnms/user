@@ -2,9 +2,11 @@ package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.*;
+import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
+import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
@@ -20,8 +22,12 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class AdminService {
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
 
-    public List<AdminUserListDTO> getAllUser(User adminUser) {
+    public List<AdminUserListDTO> getAllUser(Long userId) {
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -34,7 +40,10 @@ public class AdminService {
         return userListDTOS;
     }
 
-    public List<AdminHostListDTO> getAllHost(User adminUser) {
+    public List<AdminHostListDTO> getAllHost(Long userId) {
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -49,7 +58,10 @@ public class AdminService {
     }
 
     @Transactional
-    public void changeState(Long userId, boolean active, User adminUser){
+    public void changeState(Long userId, boolean active, Long adminId){
+        User adminUser = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -75,7 +87,10 @@ public class AdminService {
     }
 
     @Transactional
-    public void deleteHost(User adminUser, Long userId){
+    public void deleteHost(Long adminId, Long userId){
+        User adminUser = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         // 운영자 권한 확인
         if (adminUser.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
@@ -89,6 +104,19 @@ public class AdminService {
         }
 
         userRepository.delete(deleteUser);
+    }
+
+    public List<AddressDTO> getAllAddresses(Long userId){
+        User adminUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Address> addresses = addressRepository.findAll();
+
+        List<AddressDTO> addressDTOS = addresses.stream()
+                .map(address->AddressDTO.fromEntity(address))
+                .toList();
+
+        return addressDTOS;
     }
 
 }

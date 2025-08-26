@@ -38,9 +38,9 @@ public class NotificationSchedulerService {
     private static final Lock schedulerLock = new ReentrantLock();
 
     //TEST용
-    //@Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 * * * * *")
     //10분 마다 스케줄러 실행
-    @Scheduled(cron = "0 */10 * * * *")
+    //@Scheduled(cron = "0 */10 * * * *")
     @Transactional(readOnly = true)
     public void scheduleNotifications() {
         // 락 획득 시도 (30초 대기)

@@ -1,9 +1,8 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
+import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminHostListDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminUserListDTO;
-import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.service.AdminService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
@@ -31,9 +30,9 @@ public class AdminController {
     @Operation(summary = "사용자 전체 목록 조회",
             description = "사용자 전체 목록 조회(user), ex) GET /api/admin/userList")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponse<List<AdminUserListDTO>>> getAllUser(@AuthenticationPrincipal CustomUserDetails userDetails){
-        User adminUser = userDetails.getUser();
-        List<AdminUserListDTO> userListDTOS = adminService.getAllUser(adminUser);
+    public ResponseEntity<SuccessResponse<List<AdminUserListDTO>>> getAllUser(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        List<AdminUserListDTO> userListDTOS = adminService.getAllUser(userId);
         return ApiResponseUtil.success(userListDTOS);
     }
 
@@ -41,9 +40,9 @@ public class AdminController {
     @Operation(summary = "주최자 전체 목록 조회",
             description = "주최자 전체 목록 조회(host), ex) GET /api/admin/hostList")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponse<List<AdminHostListDTO>>> getAllHostList(@AuthenticationPrincipal CustomUserDetails userDetails){
-        User adminUser = userDetails.getUser();
-        List<AdminHostListDTO> hostListDTOS = adminService.getAllHost(adminUser);
+    public ResponseEntity<SuccessResponse<List<AdminHostListDTO>>> getAllHostList(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        List<AdminHostListDTO> hostListDTOS = adminService.getAllHost(userId);
         return ApiResponseUtil.success(hostListDTOS);
     }
 
@@ -56,9 +55,9 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
     })
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponse<Void>> changeState(@PathVariable Long userId, @RequestParam boolean active, @AuthenticationPrincipal CustomUserDetails userDetails){
-        User adminUser = userDetails.getUser();
-        adminService.changeState(userId, active, adminUser);
+    public ResponseEntity<SuccessResponse<Void>> changeState(@PathVariable Long userId, @RequestParam boolean active, @AuthenticationPrincipal String principal){
+        Long adminId = Long.parseLong(principal);
+        adminService.changeState(userId, active, adminId);
         return ApiResponseUtil.success(null, "회원 상태 조정 완료");
     }
 
@@ -66,11 +65,20 @@ public class AdminController {
     @Operation(summary = "주최자 탈퇴(삭제)",
             description = "운영관리자가 주최자 탈퇴(host), ex) DELETE /api/admin/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponse<Void>> deleteHost(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long userId){
-        User adminUser = userDetails.getUser();
-        adminService.deleteHost(adminUser, userId);
+    public ResponseEntity<SuccessResponse<Void>> deleteHost(@AuthenticationPrincipal String principal, @PathVariable Long userId){
+        Long adminId = Long.parseLong(principal);
+        adminService.deleteHost(adminId, userId);
 
         return ApiResponseUtil.success(null, "주최측 탈퇴 완료");
     }
 
+    @GetMapping
+    @Operation(summary = "전체 회원 주소 정보 조회",
+            description = "회원 주소 정보 조회 ex) GET /api/admin/addresses")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAllAddresses(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        List<AddressDTO> addressDTOS = adminService.getAllAddresses(userId);
+        return ApiResponseUtil.success(addressDTOS);
+    }
 }
