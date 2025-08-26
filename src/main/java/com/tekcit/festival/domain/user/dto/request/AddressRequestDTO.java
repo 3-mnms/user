@@ -31,13 +31,17 @@ public class AddressRequestDTO {
     @NotBlank(message = "수령자 전화번호는 필수 입력사항 입니다.")
     private String phone;
 
+    @Schema(description = "기본 배송지 여부")
+    @NotBlank(message = "기본 배송지 여부는 필수 입력사항 입니다.")
+    private boolean isDefault;
+
     public Address toAddressEntity(UserProfile userProfile){
         return Address.builder()
                 .address(address)
                 .zipCode(zipCode)
                 .name(name)
                 .phone(phone)
-                .isDefault(false)
+                .isDefault(isDefault)
                 .userProfile(userProfile)
                 .build();
     }
