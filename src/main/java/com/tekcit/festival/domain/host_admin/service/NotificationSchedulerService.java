@@ -41,7 +41,7 @@ public class NotificationSchedulerService {
     @Scheduled(cron = "0 * * * * *")
     //10분 마다 스케줄러 실행
     //@Scheduled(cron = "0 */10 * * * *")
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     public void scheduleNotifications() {
         // 락 획득 시도 (30초 대기)
         try {
