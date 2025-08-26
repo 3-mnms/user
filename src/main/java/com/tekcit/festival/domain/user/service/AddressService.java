@@ -91,7 +91,7 @@ public class AddressService {
         addressRepository.delete(address);
     }
 
-    public List<AddressDTO> getAddresses(Long userId){
+    public List<AddressDTO> getAllAddresses(Long userId){
         List<Address> addresses = addressRepository.findAllByUserId(userId);
 
         List<AddressDTO> addressDTOS = addresses.stream()
@@ -99,6 +99,17 @@ public class AddressService {
                 .toList();
 
         return addressDTOS;
+    }
+
+    public AddressDTO getDefaultAddress(Long userId){
+        Address address = addressRepository.findDefaultByUserId(userId)
+                .orElse(null);
+
+        if(address == null)
+            return null;
+
+        AddressDTO addressDTO = AddressDTO.fromEntity(address);
+        return addressDTO;
     }
 
 }

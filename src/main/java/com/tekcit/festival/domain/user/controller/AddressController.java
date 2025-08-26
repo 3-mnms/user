@@ -63,13 +63,23 @@ public class AddressController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    @Operation(summary = "회원 주소 정보 조회",
-            description = "회원 주소 정보 조회 ex) GET /api/addresses")
+    @GetMapping(value="/allAddress")
+    @Operation(summary = "회원 주소 정보 전체 조회",
+            description = "회원 주소 정보 전체 조회 ex) GET /api/addresses/allAddress")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAddresses(@AuthenticationPrincipal String principal){
+    public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAllAddresses(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
-        List<AddressDTO> addressDTOS = addressService.getAddresses(userId);
+        List<AddressDTO> addressDTOS = addressService.getAllAddresses(userId);
+        return ApiResponseUtil.success(addressDTOS);
+    }
+
+    @GetMapping(value="/defaultAddress")
+    @Operation(summary = "회원 주소 기본 배송지 조회",
+            description = "회원 주소 기본 배송지 정보 조회 ex) GET /api/addresses/defaultAddress")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<SuccessResponse<AddressDTO>> getDefaultAddress(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        AddressDTO addressDTOS = addressService.getDefaultAddress(userId);
         return ApiResponseUtil.success(addressDTOS);
     }
 
