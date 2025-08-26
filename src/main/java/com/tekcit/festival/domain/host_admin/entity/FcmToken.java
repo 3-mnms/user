@@ -2,8 +2,8 @@ package com.tekcit.festival.domain.host_admin.entity;
 
 import com.tekcit.festival.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,21 +17,24 @@ import java.time.LocalDateTime;
         }
 )
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class FcmToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tokenId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    @Setter
     @Column(length = 255, nullable = false)
     private String token;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)

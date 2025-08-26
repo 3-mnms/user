@@ -23,7 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -58,11 +57,10 @@ public class SecurityConfig {
                                 "/api/users/signupAdmin",
                                 "/api/users/findLoginId",
                                 "/api/users/findRegisteredEmail",
-                                //"/api/users/fcm-token",
                                 "/api/users/resetPasswordEmail",
                                 "/api/users/login",
                                 "/api/auth/kakao/signupUser"
-                                ).anonymous()
+                        ).anonymous()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -75,6 +73,7 @@ public class SecurityConfig {
                                 "/api/users/statisticsList",
                                 "/api/users/reservationList"
                         ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users/fcm-token").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(headerAuthFilter, AuthorizationFilter.class);

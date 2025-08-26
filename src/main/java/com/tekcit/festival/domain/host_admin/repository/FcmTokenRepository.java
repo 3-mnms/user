@@ -18,4 +18,13 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
     // 주어진 사용자 ID 목록에 해당하는 모든 FCM 토큰 문자열을 조회
     @Query("select t.token from FcmToken t where t.user.userId in :userIds")
     List<String> findTokensByUserIds(@Param("userIds") Collection<Long> userIds);
+
+    // 주어진 토큰 목록에 해당하는 모든 FcmToken 엔티티를 삭제합니다.
+    void deleteAllByTokenIn(Collection<String> tokens);
+
+    //주어진 사용자 ID 목록에 해당하는 모든 FcmToken의 토큰 문자열을 조회합니다.
+    //List<String> findTokensByUserIds(List<Long> userIds);
+
+    @Query("SELECT f.token FROM FcmToken f WHERE f.user.userId IN :userIds")
+    List<String> findTokensByUserIds(@Param("userIds") List<Long> userIds);
 }

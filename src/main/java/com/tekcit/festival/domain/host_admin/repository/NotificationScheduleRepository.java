@@ -11,6 +11,9 @@ public interface NotificationScheduleRepository extends JpaRepository<Notificati
     // 특정 발송 시각에 해당하는 모든 예약 알림 목록을 조회 (스케줄러에서 사용)
     List<NotificationSchedule> findBySendTime(LocalDateTime sendTime);
 
+    // 스케줄러 로직 변경에 따라 추가된 메서드: 특정 시간 범위 내에 발송될 알림 목록 조회
+    List<NotificationSchedule> findBySendTimeBetween(LocalDateTime start, LocalDateTime end);
+
     // 동일한 페스티벌 ID, 공연 시작 시각, 발송 시각을 가진 알림 예약이 존재하는지 중복을 확인
     boolean existsByFidAndStartAtAndSendTime(String fid, LocalDateTime startAt, LocalDateTime sendTime);
 
