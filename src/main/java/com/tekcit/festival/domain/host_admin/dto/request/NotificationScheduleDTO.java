@@ -16,6 +16,8 @@ public class NotificationScheduleDTO {
     @NotBlank(message = "페스티벌 ID는 필수입니다.")
     private String fid;
 
+    private String fname;
+
     @NotBlank(message = "제목은 필수입니다.")
     @Size(max = 20, message = "제목은 20자 이내여야 합니다.")
     private String title;

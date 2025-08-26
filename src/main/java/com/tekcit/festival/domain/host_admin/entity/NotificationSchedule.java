@@ -1,10 +1,15 @@
 package com.tekcit.festival.domain.host_admin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.Size;
+
 
 @Entity
 @Table(
@@ -21,8 +26,11 @@ import jakarta.validation.constraints.Size;
                 @Index(name = "idx_notice_start_at", columnList = "start_at")
         }
 )
+@Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationSchedule {
 
     @Id
@@ -51,6 +59,9 @@ public class NotificationSchedule {
 
     @Column(name = "is_sent", nullable = false)
     private boolean isSent = false;
+
+    @Column(name = "fname", nullable = false)
+    private String fname;
 
     @PrePersist
     public void prePersist() {

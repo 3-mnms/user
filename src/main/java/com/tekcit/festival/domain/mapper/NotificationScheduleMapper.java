@@ -17,7 +17,8 @@ public class NotificationScheduleMapper {
                 e.getSendTime(),
                 e.isSent(),
                 e.getFid(),
-                e.getStartAt()
+                e.getStartAt(),
+                e.getFname()
         );
     }
 

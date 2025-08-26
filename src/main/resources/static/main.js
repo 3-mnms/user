@@ -19,14 +19,14 @@ function requestPushPermission() {
       Notification.requestPermission().then((permission) => {
         if (permission === "granted") {
           messaging.getToken({
-            vapidKey: "BGhAum-SJ8ZrzB6LU5Y2-eBEwzgqK599sBKt60_6w0Aw8cKWTEQRZQ8slpUX4vJJ-wsXRyIvM5znTDaUncqxm5o",
+            vapidKey: "BFD_AQGpmHFhetKPS9Y3SKeF9j5iLdxF6v1gvMvYSCvDRRlRV3MkgpZKoPuKAd-LvkvY2cyXSuxcLkdDwoz6RdE",
             serviceWorkerRegistration: registration
           }).then((token) => {
             console.log("✅ FCM Token:", token);
-            alert("📱 모바일 FCM 토큰:\n" + token); // ✅ 여기에 alert 추가!
+            alert("📱 모바일 FCM 토큰:\n" + token);
 
             //fetch("https://47279e5b2b9a.ngrok-free.app/api/fcm-token", {
-            fetch("http://localhost:8080/api/fcm-token", {
+            fetch("http://localhost:100000/api/users/fcm-token", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"

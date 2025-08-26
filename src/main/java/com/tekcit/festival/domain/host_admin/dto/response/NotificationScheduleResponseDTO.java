@@ -35,4 +35,7 @@ public class NotificationScheduleResponseDTO {
 
     @Schema(description = "공연 시작 시각", example = "2024-12-25T18:30")
     private LocalDateTime startAt;
+
+    @Schema(description = "공연명(스냅샷)", example = "뮤지컬 캣츠")
+    private String fname;
 }
