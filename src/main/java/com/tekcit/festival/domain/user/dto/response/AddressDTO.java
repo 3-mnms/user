@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AddressDTO {
+    @Schema(description = "주소 Id")
+    private Long id;
+
     @Schema(description = "수령자 이름")
     private String name;
 
@@ -34,6 +37,7 @@ public class AddressDTO {
     @Schema(hidden = true)
     public static AddressDTO fromEntity(Address address) {
         return AddressDTO.builder()
+                .id(address.getId())
                 .name(address.getName())
                 .phone(address.getPhone())
                 .address(address.getAddress())
