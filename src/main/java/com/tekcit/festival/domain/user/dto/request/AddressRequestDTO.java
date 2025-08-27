@@ -4,6 +4,7 @@ import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.UserProfile;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,7 +33,6 @@ public class AddressRequestDTO {
     private String phone;
 
     @Schema(description = "기본 배송지 여부")
-    @NotBlank(message = "기본 배송지 여부는 필수 입력사항 입니다.")
     private boolean isDefault;
 
     public Address toAddressEntity(UserProfile userProfile){
