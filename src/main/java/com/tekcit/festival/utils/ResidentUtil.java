@@ -1,6 +1,8 @@
 package com.tekcit.festival.utils;
 
 import com.tekcit.festival.domain.user.enums.UserGender;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -8,12 +10,14 @@ import java.time.LocalDate;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ResidentUtil {
+    private static final int MAX_AGE = 120;
+
     public static int calcAge(String residentNum){
         if (residentNum == null || !residentNum.contains("-")) {
-            throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
+            throw new BusinessException(ErrorCode.INVALID_RESIDENT_NUMBER);
         }
 
-        String[] rArray = residentNum.split("-");
+        String[] rArray = residentNum.split("-", 2);
         String birth = rArray[0];
         char gender = rArray[1].charAt(0);
 
@@ -26,19 +30,24 @@ public final class ResidentUtil {
             case '3': case '4': case '7': case '8':
                 year += 2000;
                 break;
-            case '9': case '0':
-                year += 1800;
-                break;
             default:
-                throw new IllegalArgumentException("올바르지 않은 성별 코드입니다.");
+                throw new BusinessException(ErrorCode.INVALID_RESIDENT_NUMBER);
         }
+
         int currentYear = LocalDate.now().getYear();
-        return currentYear-year+1;
+        if(currentYear<year)
+            throw new BusinessException(ErrorCode.INVALID_RESIDENT_NUMBER);
+
+        int age = currentYear-year+1;
+        if(age>MAX_AGE)
+            throw new BusinessException(ErrorCode.INVALID_RESIDENT_NUMBER);
+
+        return age;
     }
 
     public static String calcBirth(String residentNum){
         if (residentNum == null || !residentNum.contains("-")) {
-            throw new IllegalArgumentException("올바르지 않은 주민번호 형식입니다.");
+            throw new BusinessException(ErrorCode.INVALID_RESIDENT_NUMBER);
         }
 
         String[] rArray = residentNum.split("-");
