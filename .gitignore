@@ -50,6 +50,17 @@ logs/
 
 # 민감한 설정 파일들
 src/main/resources/application-secret.properties
-src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
 *.secret.properties
+
+keys
+keys/**
+
+src/main/resources/keys/private.pem
+**/private.pem
+
+gateway-config
+init
+
+src/main/resources/firebase/firebase-adminsdk.json
+docker-compose.yml
