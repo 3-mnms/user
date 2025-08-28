@@ -83,4 +83,13 @@ public class AddressController {
         return ApiResponseUtil.success(addressDTOS);
     }
 
+    @GetMapping(value="/{addressId}")
+    @Operation(summary = "회원 주소 정보 한 개 조회",
+            description = "회원 주소 정보 한 개 조회 ex) GET /api/addresses/{addressId}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<SuccessResponse<AddressDTO>> getAddress(@PathVariable Long addressId){
+        AddressDTO addressDTO = addressService.getAddress(addressId);
+        return ApiResponseUtil.success(addressDTO);
+    }
+
 }

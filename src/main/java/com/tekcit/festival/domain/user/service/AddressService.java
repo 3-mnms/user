@@ -48,6 +48,7 @@ public class AddressService {
         address.setZipCode(addressRequestDTO.getZipCode());
         address.setName(addressRequestDTO.getName());
         address.setPhone(addressRequestDTO.getPhone());
+        address.setDefault(addressRequestDTO.isDefault());
 
         addressRepository.save(address);
         return AddressDTO.fromEntity(address);
@@ -107,6 +108,14 @@ public class AddressService {
 
         if(address == null)
             return null;
+
+        AddressDTO addressDTO = AddressDTO.fromEntity(address);
+        return addressDTO;
+    }
+
+    public AddressDTO getAddress(Long addressId){
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
 
         AddressDTO addressDTO = AddressDTO.fromEntity(address);
         return addressDTO;
