@@ -43,9 +43,9 @@ public class UserInfoController {
     @PostMapping(value = "/statisticsList")
     @Operation(summary = "통계 정보 조회",
             description = "통계 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/statisticsList")
-    public ResponseEntity<SuccessResponse<List<StatisticsDTO>>> getStatisticsInfo(@RequestBody List<Long> userIds){
+    public ResponseEntity<List<StatisticsDTO>> getStatisticsInfo(@RequestBody List<Long> userIds){
         List<StatisticsDTO> statisticsDTOS = userInfoService.getStatisticsInfo(userIds);
-        return ApiResponseUtil.success(statisticsDTOS);
+        return ResponseEntity.ok(statisticsDTOS);
     }
 
     @GetMapping(value = "/preReservation")

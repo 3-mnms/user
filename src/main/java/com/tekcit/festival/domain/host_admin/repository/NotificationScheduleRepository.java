@@ -24,8 +24,8 @@ public interface NotificationScheduleRepository extends JpaRepository<Notificati
     List<NotificationSchedule> findAllByFidOrderBySendTimeDesc(String fid);
 
     // 아직 발송되지 않았고 발송 시각이 현재 시간보다 이전인 알림들을 조회, 제한
-    List<NotificationSchedule> findByIsSentFalseAndSendTimeBefore(LocalDateTime cutoff);
-
+    //List<NotificationSchedule> findBySendTimeBetweenAndSentFalse(LocalDateTime cutoff);
+    List<NotificationSchedule> findBySendTimeBetweenAndIsSentFalse(LocalDateTime start, LocalDateTime end);
     // 특정 사용자(주최자)가 등록한 모든 알림 예약 목록을 조회
     List<NotificationSchedule> findByUserId(Long userId);
 }
