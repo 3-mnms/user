@@ -1,8 +1,9 @@
 package com.tekcit.festival.domain.host_admin.service;
 
 import com.tekcit.festival.domain.host_admin.dto.request.BookingRequestDTO;
-import com.tekcit.festival.domain.host_admin.dto.response.BookingInfoDTO;
+import com.tekcit.festival.domain.host_admin.entity.Notification;
 import com.tekcit.festival.domain.host_admin.entity.NotificationSchedule;
+import com.tekcit.festival.domain.host_admin.repository.NotificationRepository;
 import com.tekcit.festival.domain.host_admin.repository.NotificationScheduleRepository;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,22 +35,23 @@ import java.util.stream.Collectors;
 public class NotificationSchedulerService {
 
     private final WebClient bookingWebClient;
-    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
     private final NotificationScheduleRepository scheduleRepository;
+    private final FcmService fcmService;
 
-    // 분산 환경에서 스케줄러 중복 실행을 막기 위한 로컬 락
+    // 단일 프로세스 내에서 스케줄러 중복 실행을 막기 위한 로컬 락
     private static final Lock schedulerLock = new ReentrantLock();
 
-    //TEST용
+    // 프로세스 내에서 동일한 작업이 중복 예약되는 것을 막기 위한 Set
+    private static final Set<Long> inFlight = ConcurrentHashMap.newKeySet();
+
+    // 매분 실행되는 스케줄러
     @Scheduled(cron = "0 * * * * *")
-    //10분 마다 스케줄러 실행
-    //@Scheduled(cron = "0 */10 * * * *")
-    @Transactional(readOnly = true)
     public void scheduleNotifications() {
         // 락 획득 시도 (30초 대기)
         try {
             if (!schedulerLock.tryLock(30, TimeUnit.SECONDS)) {
-                log.info("다른 인스턴스에서 스케줄러가 이미 실행 중입니다. 스킵합니다.");
+                log.info("다른 스케줄러 인스턴스가 이미 실행 중입니다. 작업을 건너뜁니다.");
                 return;
             }
         } catch (InterruptedException e) {
@@ -56,76 +61,94 @@ public class NotificationSchedulerService {
         }
 
         try {
-            log.info("예약 알림 스케줄러 실행: {}", LocalDateTime.now());
+            final ZoneId KST = ZoneId.of("Asia/Seoul");
+            log.info("스케줄러 실행 시각: {}", LocalDateTime.now(KST));
 
-            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul")).truncatedTo(ChronoUnit.MINUTES);
-            //TEST용
-            //LocalDateTime startOfWindow = now.plusMinutes(1);
-            //LocalDateTime endOfWindow = now.plusMinutes(5);
+            // 현재 시각으로부터 1분 이내의 발송 예정 스케줄을 조회
+            LocalDateTime now = LocalDateTime.now(KST).truncatedTo(ChronoUnit.MINUTES);
+            LocalDateTime endOfWindow = now.plusMinutes(1);
 
-            //13:00에 시작하면 13:01~13:10사이의 스케줄을 확인함
-            LocalDateTime startOfWindow = now.plusMinutes(1);
-            LocalDateTime endOfWindow = now.plusMinutes(10);
-
-            List<NotificationSchedule> schedules = scheduleRepository.findBySendTimeBetween(startOfWindow, endOfWindow);
-
+            // 아직 발송되지 않은 알림 스케줄만 DB에서 가져옴
+            List<NotificationSchedule> schedules = scheduleRepository.findBySendTimeBetweenAndIsSentFalse(now, endOfWindow);
             if (schedules.isEmpty()) {
-                log.info("{} ~ {} 사이 발송될 예약 알림이 없습니다.", startOfWindow, endOfWindow);
+                log.info("이번 분에 발송될 알림이 없습니다.");
                 return;
             }
 
             schedules.forEach(schedule -> {
-                BookingRequestDTO requestDTO = new BookingRequestDTO(
-                        schedule.getFid(),
-                        schedule.getStartAt()
-                );
+                Long scheduleId = schedule.getScheduleId();
+                // 해당 작업이 이미 예약되었는지 확인하여 중복 방지
+                if (!inFlight.add(scheduleId)) {
+                    log.info("스케줄 ID {}는 이미 처리 중입니다. 건너뜁니다.", scheduleId);
+                    return;
+                }
 
-                long delayInSeconds = Duration.between(now, schedule.getSendTime()).toMillis() / 1000;
+                // 발송 시각이 지났을 경우 지연 시간을 0으로 설정
+                long delayInSeconds = Math.max(0, Duration.between(LocalDateTime.now(KST), schedule.getSendTime()).getSeconds());
 
+                // WebClient를 이용한 비동기 작업 시작
                 bookingWebClient.post()
                         .uri("/api/host/list")
-                        .body(Mono.just(requestDTO), BookingRequestDTO.class)
+                        .bodyValue(new BookingRequestDTO(schedule.getFid(), schedule.getStartAt()))
                         .retrieve()
                         .bodyToMono(new ParameterizedTypeReference<SuccessResponse<List<Long>>>() {})
-                        .publishOn(Schedulers.boundedElastic())
-                        .delaySubscription(Duration.ofSeconds(delayInSeconds))
-                        // API 호출 직전에 파라미터 로깅 추가
-                        .doOnSubscribe(subscription -> log.info("[API 호출] bookingWebClient 시작. 파라미터: {}", requestDTO))
+                        .timeout(Duration.ofSeconds(5)) // 5초 타임아웃
+                        .retryWhen(Retry.backoff(3, Duration.ofMillis(500))) // 최대 3회 재시도 (500ms 간격으로 지수 백오프)
+                        .publishOn(Schedulers.boundedElastic()) // JPA와 같은 블로킹 작업 보호
+                        .delaySubscription(Duration.ofSeconds(delayInSeconds)) // 발송 시각까지 대기
                         .doOnSuccess(response -> {
-                            if (response.isSuccess()) {
-                                // API 성공 응답 데이터 직접 로깅 추가
-                                log.info("[API 응답] bookingWebClient 성공. 받은 데이터: {} (총 {}명)",
-                                        response.getData(), response.getData().size());
-
-                                log.info("{} 알림 발송 시작. 사용자 수: {}", schedule.getSendTime(), response.getData().size(), LocalDateTime.now());
-
-                                List<BookingInfoDTO> bookingInfos = response.getData().stream()
-                                        .map(userId -> new BookingInfoDTO(
-                                                userId,
-                                                schedule.getFid(),
-                                                schedule.getTitle(),
-                                                schedule.getBody(),
-                                                schedule.getFname()
-                                        ))
-                                        .collect(Collectors.toList());
-
-                                notificationService.sendNotifications(bookingInfos);
-
-                                schedule.setSent(true);
-                                scheduleRepository.save(schedule);
-                                log.info("알림 발송 확정 및 DB 저장이 완료되었습니다. {}건.", bookingInfos.size());
+                            // API 호출 성공 시 처리 로직
+                            if (response.isSuccess() && response.getData() != null && !response.getData().isEmpty()) {
+                                log.info("스케줄 ID {}에 대한 API 호출 성공. {}명의 사용자를 찾았습니다.", scheduleId, response.getData().size());
+                                // 알림 발송 및 DB 저장 (트랜잭션으로 처리)
+                                sendAndSaveNotifications(schedule, response.getData());
                             } else {
-                                log.error("[API 응답] {} 알림 발송 실패: Booking MSA에서 예매자 정보 수신 실패. 원인: {}", schedule.getSendTime(), response.getMessage());
+                                log.warn("스케줄 ID {}에 대한 API 응답 실패 또는 사용자 없음. 메시지: {}", scheduleId, response.getMessage());
+                                // 사용자가 0명이라도 스케줄 상태를 '발송 완료'로 업데이트하여 재처리 방지
+                                updateScheduleStatus(schedule, true);
                             }
                         })
-                        .doOnError(throwable -> log.error("[API 오류] {} 알림 발송 실패: Booking MSA API 호출 중 오류 발생. 원인: {}", schedule.getSendTime(), throwable.getMessage(), throwable))
-                        .subscribe();
+                        .doFinally(signal -> inFlight.remove(scheduleId)) // 작업 완료 후 Set에서 ID 제거
+                        .subscribe(
+                                result -> log.info("스케줄 ID {} 알림 처리가 완료되었습니다.", scheduleId),
+                                error -> log.error("스케줄 ID {} 알림 처리 중 오류 발생. 원인: {}", scheduleId, error.getMessage(), error)
+                        );
             });
-
         } finally {
-            // 락 해제
+            // 스케줄러 락 해제
             schedulerLock.unlock();
             log.info("스케줄러 락이 해제되었습니다.");
         }
+    }
+
+    // 알림 발송 및 DB 저장을 담당하는 트랜잭션 메서드
+    @Transactional
+    public void sendAndSaveNotifications(NotificationSchedule schedule, List<Long> userIds) {
+        // FCM을 통해 알림 발송
+        fcmService.sendMessageToUsers(userIds, schedule.getTitle(), schedule.getBody());
+
+        // 알림 내역을 Notification 테이블에 저장
+        List<Notification> notificationsToSave = userIds.stream()
+                .map(userId -> Notification.builder()
+                        .userId(userId)
+                        .title(schedule.getTitle())
+                        .body(schedule.getBody())
+                        .fname(schedule.getFname())
+                        .build())
+                .collect(Collectors.toList());
+        notificationRepository.saveAll(notificationsToSave);
+
+        // 스케줄 상태를 '발송 완료'로 업데이트
+        schedule.setSent(true);
+        scheduleRepository.save(schedule);
+
+        log.info("스케줄 ID {}에 대한 알림 내역 {}건이 DB에 저장되었습니다.", schedule.getScheduleId(), notificationsToSave.size());
+    }
+
+    // 스케줄 상태만 업데이트하는 트랜잭션 메서드 (알림 발송 대상이 없을 때 사용)
+    @Transactional
+    public void updateScheduleStatus(NotificationSchedule schedule, boolean status) {
+        schedule.setSent(status);
+        scheduleRepository.save(schedule);
     }
 }

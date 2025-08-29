@@ -32,9 +32,6 @@ public class Notification {
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
 
-    @Column(name = "fid", nullable = false)
-    private String fid;
-
     @Column(name = "fname", nullable = false)
     private String fname;
 
