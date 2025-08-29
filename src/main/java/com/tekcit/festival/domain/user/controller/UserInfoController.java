@@ -24,6 +24,16 @@ public class UserInfoController {
 
     private final UserInfoService userInfoService;
 
+    @GetMapping(value="/checkAge")
+    @Operation(summary = "사용자 나이 확인",
+            description = "사용자 나이 확인(age), ex) GET /api/users/checkAge")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<SuccessResponse<CheckAgeDTO>> checkUserAgeInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        CheckAgeDTO checkAgeDTO = userInfoService.checkUserAgeInfo(userId);
+        return ApiResponseUtil.success(checkAgeDTO);
+    }
+
     @GetMapping(value="/booking-profile/{userId}")
     @Operation(summary = "예매 시 사용자 정보",
             description = "예매 시 사용자 정보(email), ex) GET /api/users/booking-profile/{userId}")

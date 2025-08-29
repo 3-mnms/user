@@ -21,6 +21,13 @@ public class UserInfoService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
 
+    public CheckAgeDTO checkUserAgeInfo(Long userId) {
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return CheckAgeDTO.fromEntity(userProfile);
+    }
+
     public BookingProfileDTO bookingProfileInfo(Long userId) {
         User bookingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
