@@ -70,8 +70,9 @@ public class UserInfoController {
     @GetMapping(value = "/transferee")
     @Operation(summary = "양도 시 이메일을 통한 양수자 정보 조회",
             description = "양도 시 이메일을 통한 양수자 정보 조회. ex) GET /api/users/transferee?email=test@test.com")
-    public ResponseEntity<SuccessResponse<AssignmentDTO>> transfereeInfo(@RequestParam String email){
-        AssignmentDTO assignmentDTO = userInfoService.transfereeInfo(email);
+    public ResponseEntity<SuccessResponse<AssignmentDTO>> transfereeInfo(@AuthenticationPrincipal String principal, @RequestParam String email){
+        Long userId = Long.parseLong(principal);
+        AssignmentDTO assignmentDTO = userInfoService.transfereeInfo(userId, email);
         return ApiResponseUtil.success(assignmentDTO);
     }
 

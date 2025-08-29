@@ -58,11 +58,17 @@ public class UserInfoService {
         return PreReservationDTO.fromUserEntity(findUser);
     }
 
-    public AssignmentDTO transfereeInfo(String email){
-        User findUser = userRepository.findByEmail(email)
+    public AssignmentDTO transfereeInfo(Long userId, String email){
+        User transferor = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        return AssignmentDTO.fromUserEntity(findUser);
+        if(transferor.getEmail().equals(email))
+            throw new BusinessException(ErrorCode.SELF_TRANSFER_FORBIDDEN);
+
+        User transferee = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return AssignmentDTO.fromUserEntity(transferee);
     }
 
     public AssignmentDTO transferorInfo(Long userId){
