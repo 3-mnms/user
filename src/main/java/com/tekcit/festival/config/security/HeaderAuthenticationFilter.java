@@ -39,11 +39,13 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
         final String userIdHeader = trimToNull(request.getHeader("X-User-Id"));
         final String rolesHdr     = trimToNull(request.getHeader("X-User-Role"));
         final String userNameHeader = trimToNull(request.getHeader("X-User-Name"));
-        String userName = new String(
-                java.util.Base64.getUrlDecoder().decode(userNameHeader),
-                java.nio.charset.StandardCharsets.UTF_8
-        );
-
+        String userName = "";
+        if(userNameHeader != null) {
+            userName = new String(
+                    java.util.Base64.getUrlDecoder().decode(userNameHeader),
+                    java.nio.charset.StandardCharsets.UTF_8
+            );
+        }
         Authentication current = SecurityContextHolder.getContext().getAuthentication();
         boolean isAnonymous = (current instanceof AnonymousAuthenticationToken);
         boolean canSetAuth = (current == null) || isAnonymous;
