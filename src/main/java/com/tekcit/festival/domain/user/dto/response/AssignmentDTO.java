@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AssignmentDTO {
+    @Schema(description = "사용자 id")
+    private Long userId;
+
     @Schema(description = "사용자 이름")
     private String name;
 
@@ -26,6 +29,7 @@ public class AssignmentDTO {
     public static AssignmentDTO fromUserEntity(User user) {
         UserProfile userProfile = user.getUserProfile();
         return AssignmentDTO.builder()
+                .userId(user.getUserId())
                 .name(user.getName())
                 .residentNum(userProfile.getResidentNum())
                 .build();
