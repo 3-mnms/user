@@ -4,36 +4,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 // --- HeaderAuthenticationFilter를 SecurityConfig 내부에 정의하여 관리합니다. ---
@@ -55,6 +38,11 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
 
         final String userIdHeader = trimToNull(request.getHeader("X-User-Id"));
         final String rolesHdr     = trimToNull(request.getHeader("X-User-Role"));
+        final String userNameHeader = trimToNull(request.getHeader("X-User-Name"));
+        String userName = new String(
+                java.util.Base64.getUrlDecoder().decode(userNameHeader),
+                java.nio.charset.StandardCharsets.UTF_8
+        );
 
         Authentication current = SecurityContextHolder.getContext().getAuthentication();
         boolean isAnonymous = (current instanceof AnonymousAuthenticationToken);
@@ -83,7 +71,7 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(String.valueOf(userId), null, authorities);
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            auth.setDetails(new AuthDetails(request, userName));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             // principal을 **Long**으로 세팅
