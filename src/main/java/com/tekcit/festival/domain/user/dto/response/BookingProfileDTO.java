@@ -17,10 +17,14 @@ public class BookingProfileDTO {
     @Schema(description = "예매자 이메일 주소")
     private String email;
 
+    @Schema(description = "예매자 이름")
+    private String name;
+
     @Schema(hidden = true)
     public static BookingProfileDTO fromEntity(User bookingUser) {
         return BookingProfileDTO.builder()
                 .email(bookingUser.getEmail())
+                .name(bookingUser.getName())
                 .build();
     }
 }
