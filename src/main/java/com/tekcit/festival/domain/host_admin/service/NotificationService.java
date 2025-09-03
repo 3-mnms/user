@@ -35,10 +35,10 @@ public class NotificationService {
     // 알림 단건 상세 조회
     public NotificationResponseDTO getNotificationDetail(Long nid, Long userId) {
         Notification notification = notificationRepository.findById(nid)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND, "Notification not found."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
         if (!notification.getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_RESOURCE, "Access denied.");
+            throw new BusinessException(ErrorCode.FORBIDDEN_RESOURCE);
         }
 
         return NotificationResponseDTO.fromEntity(notification);
@@ -54,7 +54,9 @@ public class NotificationService {
 
         if (!bookingInfos.isEmpty()) {
             BookingInfoDTO firstInfo = bookingInfos.get(0);
-            fcmService.sendMessageToUsers(userIds, firstInfo.getNotificationTitle(), firstInfo.getNotificationBody());
+            // 제목에 fname을 추가하여 [공연명] 제목 형식으로 변경
+            String finalTitle = String.format("[%s] %s", firstInfo.getFname(), firstInfo.getNotificationTitle());
+            fcmService.sendMessageToUsers(userIds, finalTitle, firstInfo.getNotificationBody());
         }
 
         List<Notification> newNotifications = bookingInfos.stream()

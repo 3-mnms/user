@@ -5,6 +5,8 @@ import com.tekcit.festival.domain.host_admin.entity.Notification;
 import com.tekcit.festival.domain.host_admin.entity.NotificationSchedule;
 import com.tekcit.festival.domain.host_admin.repository.NotificationRepository;
 import com.tekcit.festival.domain.host_admin.repository.NotificationScheduleRepository;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,6 +110,13 @@ public class NotificationSchedulerService {
                                 updateScheduleStatus(schedule, true);
                             }
                         })
+                        .doOnError(error -> {
+                            // API 호출 실패 시 처리 로직
+                            log.error("스케줄 ID {} 알림 처리 중 API 호출 실패. 원인: {}", scheduleId, error.getMessage(), error);
+                            // WebClient 통신 실패 시에도 알림 스케줄의 상태를 '실패'로 업데이트하는 로직 추가 가능
+                            // 현재는 doFinally에서 inFlight 제거만 하고, 스케줄 상태는 변경하지 않음
+                            throw new BusinessException(ErrorCode.API_CALL_FAILED);
+                        })
                         .doFinally(signal -> inFlight.remove(scheduleId)) // 작업 완료 후 Set에서 ID 제거
                         .subscribe(
                                 result -> log.info("스케줄 ID {} 알림 처리가 완료되었습니다.", scheduleId),
@@ -125,7 +134,8 @@ public class NotificationSchedulerService {
     @Transactional
     public void sendAndSaveNotifications(NotificationSchedule schedule, List<Long> userIds) {
         // FCM을 통해 알림 발송
-        fcmService.sendMessageToUsers(userIds, schedule.getTitle(), schedule.getBody());
+        String finalTitle = String.format("[%s] %s", schedule.getFname(), schedule.getTitle());
+        fcmService.sendMessageToUsers(userIds, finalTitle, schedule.getBody());
 
         // 알림 내역을 Notification 테이블에 저장
         List<Notification> notificationsToSave = userIds.stream()

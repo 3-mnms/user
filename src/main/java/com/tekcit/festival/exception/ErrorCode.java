@@ -1,6 +1,5 @@
 package com.tekcit.festival.exception;
 
-import com.google.api.Http;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -20,7 +19,8 @@ public enum ErrorCode {
     ADDRESS_DEFAULT_NOT_DELETED("U010", "기본 주소지는 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     INVALID_RESIDENT_NUMBER("U011", "올바르지 못한 주민번호입니다.", HttpStatus.BAD_REQUEST),
     SELF_TRANSFER_FORBIDDEN("U012", "본인에게는 양도를 할 수 없습니다.", HttpStatus.BAD_REQUEST),
-    //    AUTH 관련 에러입니다.
+
+    // AUTH 관련 에러입니다.
     AUTH_PASSWORD_NOT_EQUAL_ERROR("A001","일치하지 않는 비밀번호입니다.",HttpStatus.BAD_REQUEST),
     AUTH_REFRESH_TOKEN_EXPIRED("A002", "Refresh Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     AUTH_ACCESS_TOKEN_EXPIRED("A003", "Access Token이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
@@ -29,37 +29,37 @@ public enum ErrorCode {
     AUTH_NOT_ALLOWED("A006", "허용되지 않는 행동입니다.", HttpStatus.FORBIDDEN),
     AUTH_TOKEN_MISSING("A007", "토큰이 없습니다.", HttpStatus.BAD_REQUEST),
 
-    //이메일 인증 에러
+    // 이메일 인증 에러
     EMAIL_VERIFICATION_NOT_FOUND("E001", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),
     EMAIL_VERIFICATION_EXPIRED("E002","인증 코드가 만료되었습니다.", HttpStatus.GONE),
     EMAIL_VERIFICATION_CODE_MISMATCH("E003","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
 
-    //카카오 에러
+    // 카카오 에러
     KAKAO_INVALID_FIELDS("K001", "%s", HttpStatus.BAD_REQUEST),
     KAKAO_INVALID_TICKET("K002", "%s", HttpStatus.BAD_REQUEST),
     KAKAO_UNLINK_FAILED("K003", "%s", HttpStatus.BAD_REQUEST),
 
-    VERIFICATION_NOT_FOUND("U0010", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),
-    VERIFICATION_EXPIRED("U0011","인증 코드가 만료되었습니다.", HttpStatus.GONE),
-    VERIFICATION_CODE_MISMATCH("U0012","인증 코드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
-
-    NOT_FOUND("R001", "요청한 리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    FORBIDDEN("A001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
-
+    // 알림 관련 에러코드
     NOTIFICATION_NOT_FOUND("N001", "예약된 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     DUPLICATE_RESOURCE("N002", "이미 예약된 알림이 존재합니다.", HttpStatus.CONFLICT),
     REQUEST_LIMIT_EXCEEDED("N003", "하루 알림 예약 횟수 제한을 초과했습니다.", HttpStatus.TOO_MANY_REQUESTS),
     FORBIDDEN_RESOURCE("N004", "해당 알림에 대한 접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    BAD_REQUEST("N005", "잘못된 요청입니다. 이미 전송된 알림은 수정하거나 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
-    INVALID_SEND_TIME("N006", "과거 시점에 알림을 발송할 수 없습니다.", HttpStatus.BAD_REQUEST);
+    INVALID_SEND_TIME("N005", "과거 시점에 알림을 발송할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_SENT_NOTIFICATION("N006", "이미 전송된 알림은 수정하거나 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    FCM_SEND_FAILED("N007", "알림 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    API_CALL_FAILED("N008", "외부 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    private final String code;        // A001, A002 등
-    private final String message;     // 사용자에게 보여줄 메시지
-    private final HttpStatus status;  //http status 코드
+    // 기타 에러코드
+    NOT_FOUND("G001", "요청한 리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FORBIDDEN("G002", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
+
+    private final String code;
+    private final String message;
+    private final HttpStatus status;
 
     ErrorCode(String code, String message, HttpStatus status) {
         this.code = code;
         this.message = message;
         this.status = status;
     }
-}
+    }
