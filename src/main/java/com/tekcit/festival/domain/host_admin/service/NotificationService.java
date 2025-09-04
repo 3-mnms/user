@@ -44,7 +44,7 @@ public class NotificationService {
         return NotificationResponseDTO.fromEntity(notification);
     }
 
-    @Transactional
+    /*@Transactional
     public void sendNotifications(List<BookingInfoDTO> bookingInfos) {
         log.info("총 {}명에게 정해진 시각에 알림 발송을 합니다.", bookingInfos.size());
 
@@ -72,5 +72,5 @@ public class NotificationService {
         notificationRepository.saveAll(newNotifications);
 
         log.info("알림 발송 확정 및 DB 저장이 완료되었습니다. {}건.", newNotifications.size());
-    }
+    }*/
 }

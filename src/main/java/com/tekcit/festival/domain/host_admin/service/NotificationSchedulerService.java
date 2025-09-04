@@ -100,14 +100,19 @@ public class NotificationSchedulerService {
                         .delaySubscription(Duration.ofSeconds(delayInSeconds)) // 발송 시각까지 대기
                         .doOnSuccess(response -> {
                             // API 호출 성공 시 처리 로직
+                            // API 호출 성공 시 처리 로직
                             if (response.isSuccess() && response.getData() != null && !response.getData().isEmpty()) {
                                 log.info("스케줄 ID {}에 대한 API 호출 성공. {}명의 사용자를 찾았습니다.", scheduleId, response.getData().size());
+
+                                // Add this line to log the list of user IDs.
+                                log.info("스케줄 ID {}에 대한 예매자 리스트: {}", scheduleId, response.getData());
+
                                 // 알림 발송 및 DB 저장 (트랜잭션으로 처리)
                                 sendAndSaveNotifications(schedule, response.getData());
                             } else {
                                 log.warn("스케줄 ID {}에 대한 API 응답 실패 또는 사용자 없음. 메시지: {}", scheduleId, response.getMessage());
                                 // 사용자가 0명이라도 스케줄 상태를 '발송 완료'로 업데이트하여 재처리 방지
-                                updateScheduleStatus(schedule, true);
+                                updateScheduleStatus(schedule, true);;
                             }
                         })
                         .doOnError(error -> {
@@ -135,6 +140,8 @@ public class NotificationSchedulerService {
     public void sendAndSaveNotifications(NotificationSchedule schedule, List<Long> userIds) {
         // FCM을 통해 알림 발송
         String finalTitle = String.format("[%s] %s", schedule.getFname(), schedule.getTitle());
+        log.info("FCM 발송 직전 제목: '{}', 내용: '{}'", finalTitle, schedule.getBody());
+
         fcmService.sendMessageToUsers(userIds, finalTitle, schedule.getBody());
 
         // 알림 내역을 Notification 테이블에 저장
