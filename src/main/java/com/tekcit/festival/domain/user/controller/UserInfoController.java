@@ -85,4 +85,13 @@ public class UserInfoController {
         return ApiResponseUtil.success(assignmentDTO);
     }
 
+    @GetMapping(value = "/geocodeInfo")
+    @Operation(summary = "사용자 위도 경도 정보 조회",
+            description = "사용자 위도 경도 정보 조회. ex) GET /api/users/geocodeInfo")
+    public ResponseEntity<SuccessResponse<GeoCodeInfoDTO>> geoCodeInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        GeoCodeInfoDTO geoCodeInfo = userInfoService.geoCodeInfo(userId);
+        return ApiResponseUtil.success(geoCodeInfo);
+    }
+
 }

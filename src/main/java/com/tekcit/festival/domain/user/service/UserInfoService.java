@@ -3,6 +3,7 @@ package com.tekcit.festival.domain.user.service;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
+import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
@@ -76,6 +77,13 @@ public class UserInfoService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return AssignmentDTO.fromUserEntity(findUser);
+    }
+
+    public GeoCodeInfoDTO geoCodeInfo(Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return GeoCodeInfoDTO.fromUserProfileEntity(userId, findUser.getUserProfile());
     }
 
 }
