@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,25 +25,23 @@ public class FcmTokenController {
     private final UserRepository userRepository;
     private final FcmService fcmService; // FcmService 의존성 주입
 
+    // 공통 로직을 별도의 메서드로 분리
+    private Long getUserIdFromSecurityContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return Long.parseLong(authentication.getName());
+    }
+
     // FCM 토큰 저장/갱신
     @PostMapping("/fcm-token")
-    public ResponseEntity<String> receiveToken(
-            @RequestBody FcmTokenRequestDTO requestDto,
-            Authentication authentication) {
-
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "인증 정보가 없습니다.");
-        }
-
-        String userIdStr = (String) authentication.getPrincipal();
-        Long userId = Long.valueOf(userIdStr);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> receiveToken(@RequestBody FcmTokenRequestDTO requestDto) {
+        Long userId = getUserIdFromSecurityContext();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "존재하지 않는 사용자 ID: " + userId));
 
         fcmService.saveToken(user, requestDto.getToken());
-
         return ResponseEntity.ok("토큰 저장 완료");
     }
 

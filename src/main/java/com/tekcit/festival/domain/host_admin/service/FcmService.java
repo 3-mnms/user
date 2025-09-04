@@ -4,6 +4,8 @@ import com.google.firebase.messaging.*;
 import com.tekcit.festival.domain.host_admin.entity.FcmToken;
 import com.tekcit.festival.domain.host_admin.repository.FcmTokenRepository;
 import com.tekcit.festival.domain.user.entity.User;
+import com.tekcit.festival.exception.BusinessException;
+import com.tekcit.festival.exception.ErrorCode;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,9 @@ public class FcmService {
         }
 
         MulticastMessage multicastMessage = MulticastMessage.builder()
-                .setNotification(Notification.builder().setTitle(title).setBody(body).build())
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body).build())
                 .addAllTokens(tokens)
                 .build();
 
@@ -54,6 +58,7 @@ public class FcmService {
             }
         } catch (FirebaseMessagingException e) {
             log.error("FCM 멀티캐스트 메시지 전송 실패", e);
+            throw new BusinessException(ErrorCode.FCM_SEND_FAILED);
         }
     }
 
