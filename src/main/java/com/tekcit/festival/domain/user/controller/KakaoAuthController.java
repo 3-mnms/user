@@ -30,7 +30,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Tag(name = "카카오 회원가입, 로그인 API", description = "카카오 회원가입, 로그인, 로그아웃, 토큰 재발급")
 public class KakaoAuthController {
-    @Value("${kakao.client-id}")
+    @Value("${kakao.restapi-key}")
     private String clientId;
 
     @Value("${kakao.redirect-uri}")

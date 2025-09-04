@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.entity;
 
+import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.persistence.*;
@@ -33,6 +34,17 @@ public class UserProfile {
 
     @Column(name = "birth", nullable = false)
     private String birth;
+
+    @Column(name = "latitude",  columnDefinition = "DECIMAL(10,7)")
+    private Double latitude; //위도
+
+    @Column(name = "longitude",  columnDefinition = "DECIMAL(10,7)")
+    private Double longitude;//경도
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private GeocodeStatus isGeocoded = GeocodeStatus.PENDING;//지오코드 여부(위도, 경도)
 
     @Builder.Default
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)

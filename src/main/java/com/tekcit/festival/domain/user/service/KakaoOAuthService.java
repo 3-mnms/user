@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class KakaoOAuthService {
-    @Value("${kakao.client-id}")
+    @Value("${kakao.restapi-key}")
     private String clientId;
 
     @Value("${kakao.redirect-uri}")

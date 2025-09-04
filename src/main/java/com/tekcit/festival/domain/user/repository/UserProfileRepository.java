@@ -2,6 +2,7 @@ package com.tekcit.festival.domain.user.repository;
 
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +15,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     @Query("select up from UserProfile up where up.user.userId in :userIds")
     List<UserProfile> findAllByUserIds(List<Long> userIds);
+
+    @Query("select up from UserProfile up where up.isGeocoded= 'PENDING'")
+    List<UserProfile> findGeocoding(Pageable pageable);
 }
