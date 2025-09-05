@@ -21,6 +21,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     @Query("SELECT a FROM Address a WHERE a.userProfile = :userProfile AND a.isDefault = true")
     Optional<Address> findDefaultByUserProfile(UserProfile userProfile);
 
-    @Query("select a from Address a where a.isGeocoded= 'PENDING'")
+    @Query("select a from Address a where a.isGeocoded= 'PENDING' or a.isGeocoded='UPDATED'")
     List<Address> findGeocoding(Pageable pageable);
 }

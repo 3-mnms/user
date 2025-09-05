@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserGeocodeService {
-    private final UserProfileRepository userProfileRepository;
     private final AddressRepository addressRepository;
     private final KakaoSearchService kakaoSearchService;
 
