@@ -2,7 +2,6 @@ package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.domain.user.dto.response.KakaoMapResponseDTO;
 import com.tekcit.festival.domain.user.entity.Address;
-import com.tekcit.festival.domain.user.entity.UserProfile;
 import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
@@ -31,24 +30,19 @@ public class UserGeocodeService {
     }
 
     @Transactional
-    public boolean geocode(UserProfile userProfile){
-        log.info("geocode 시작", userProfile.getUId());
-        Address address = addressRepository.findDefaultByUserProfile(userProfile)
-                .orElse(null);
-        if(address == null) {
-            log.info("기본 배송지가 없습니다.");
-            return false;
-        }
+    public boolean geocode(Address address){
+        log.info("geocode 시작", address.getId());
+
         String searchAddress = normalizeAddress(address.getAddress());
         log.info("searchAddress:{}", searchAddress);
         KakaoMapResponseDTO response = kakaoSearchService.geocodeAddress(searchAddress)
                 .orElse(null);
 
         if(response != null) {
-            userProfile.setLongitude(Double.parseDouble(response.getLongitude()));
-            userProfile.setLatitude(Double.parseDouble(response.getLatitude()));
-            userProfile.setIsGeocoded(GeocodeStatus.SUCCESS);
-            userProfileRepository.save(userProfile);
+            address.setLongitude(Double.parseDouble(response.getLongitude()));
+            address.setLatitude(Double.parseDouble(response.getLatitude()));
+            address.setIsGeocoded(GeocodeStatus.SUCCESS);
+            addressRepository.save(address);
             return true;
         }
         else
@@ -57,19 +51,19 @@ public class UserGeocodeService {
 
     @Transactional
     public int geocodeBatch(int size){
-        List<UserProfile> userProfiles = userProfileRepository.findGeocoding(PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "uId")));
-        log.info("[GEOCODE] picked targets={}", userProfiles.size());
+        List<Address> addresses = addressRepository.findGeocoding(PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "id")));
+        log.info("[GEOCODE] picked targets={}", addresses.size());
 
         int success = 0;
-        for(UserProfile userProfile: userProfiles){
-            log.info("[GEOCODE] start id={}", userProfile.getUId());
+        for(Address address: addresses){
+            log.info("[GEOCODE] start id={}, address={}", address.getId(), address.getAddress());
             try {
-                if (geocode(userProfile))
+                if (geocode(address))
                     success++;
                 else {
                     log.info("geocode 실패 (결과 없음)");
-                    userProfile.setIsGeocoded(GeocodeStatus.NO_RESULT);
-                    userProfileRepository.save(userProfile);
+                    address.setIsGeocoded(GeocodeStatus.NO_RESULT);
+                    addressRepository.save(address);
                 }
                 Thread.sleep(200);
             } catch (Exception e) {

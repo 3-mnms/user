@@ -1,6 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
+import org.springframework.security.core.Authentication;
 
-import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserInfoService;
 import com.tekcit.festival.exception.global.SuccessResponse;

@@ -1,12 +1,7 @@
 package com.tekcit.festival.domain.user.dto.response;
 
-import com.tekcit.festival.domain.user.entity.User;
-import com.tekcit.festival.domain.user.entity.UserProfile;
-import com.tekcit.festival.domain.user.enums.GeocodeStatus;
+import com.tekcit.festival.domain.user.entity.Address;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,11 +23,11 @@ public class GeoCodeInfoDTO {
     private Double longitude;//경도
 
     @Schema(hidden = true)
-    public static GeoCodeInfoDTO fromUserProfileEntity(Long userId, UserProfile userProfile) {
+    public static GeoCodeInfoDTO fromAddressEntity(Long userId, Address address) {
         return GeoCodeInfoDTO.builder()
                 .userId(userId)
-                .latitude(userProfile.getLatitude())
-                .longitude(userProfile.getLongitude())
+                .latitude(address.getLatitude())
+                .longitude(address.getLongitude())
                 .build();
     }
 }
