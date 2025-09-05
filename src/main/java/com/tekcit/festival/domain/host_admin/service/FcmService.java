@@ -12,9 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Data
 @Slf4j
@@ -24,7 +27,7 @@ public class FcmService {
 
     private final FcmTokenRepository fcmTokenRepository;
 
-    // 발송 실패 시 유효하지 않은 토큰을 DB에서 삭제합니다.
+    // 발송 실패 시 유효하지 않은 토큰을 DB에서 삭제
     @Transactional
     public void sendMessageToUsers(List<Long> userIds, String title, String body) {
         List<String> tokens = fcmTokenRepository.findTokensByUserIds(userIds);
@@ -33,13 +36,21 @@ public class FcmService {
             log.warn("전송할 FCM 토큰 없음 - 메시지 미전송");
             return;
         }
+        Map<String, String> data = new HashMap<>();
+        data.put("title", title);
+        data.put("body", body);
 
         MulticastMessage multicastMessage = MulticastMessage.builder()
+                .putAllData(data)
+                .addAllTokens(tokens)
+                .build();
+
+        /*MulticastMessage multicastMessage = MulticastMessage.builder()
                 .setNotification(Notification.builder()
                         .setTitle(title)
                         .setBody(body).build())
                 .addAllTokens(tokens)
-                .build();
+                .build();*/
 
         try {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(multicastMessage);
