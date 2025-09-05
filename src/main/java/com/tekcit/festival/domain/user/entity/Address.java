@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.entity;
 
+import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,16 @@ public class Address {
 
     @Column(name = "phone", nullable = false)
     private String phone;
+    @Column(name = "latitude",  columnDefinition = "DECIMAL(10,7)")
+    private Double latitude; //위도
+
+    @Column(name = "longitude",  columnDefinition = "DECIMAL(10,7)")
+    private Double longitude;//경도
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private GeocodeStatus isGeocoded = GeocodeStatus.PENDING;//지오코드 여부(위도, 경도)
 
     @Builder.Default
     @Column(name = "is_default", nullable = false)

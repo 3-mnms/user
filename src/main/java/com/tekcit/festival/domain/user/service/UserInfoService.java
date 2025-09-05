@@ -1,8 +1,10 @@
 package com.tekcit.festival.domain.user.service;
 
 import com.tekcit.festival.domain.user.dto.response.*;
+import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.entity.UserProfile;
+import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.domain.user.repository.UserRepository;
 import com.tekcit.festival.exception.BusinessException;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserInfoService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final AddressRepository addressRepository;
 
     public CheckAgeDTO checkUserAgeInfo(Long userId) {
         UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
@@ -76,6 +79,16 @@ public class UserInfoService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return AssignmentDTO.fromUserEntity(findUser);
+    }
+
+    public GeoCodeInfoDTO geoCodeInfo(Long userId){
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Address address = addressRepository.findDefaultByUserId(userId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.ADDRESS_DEFAULT_NOT_FOUND));
+
+        return GeoCodeInfoDTO.fromAddressEntity(userId, address);
     }
 
 }

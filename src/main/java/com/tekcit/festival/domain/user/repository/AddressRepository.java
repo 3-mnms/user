@@ -2,6 +2,7 @@ package com.tekcit.festival.domain.user.repository;
 
 import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.UserProfile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,4 +17,10 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Query("SELECT a FROM Address a WHERE a.userProfile.user.userId = :userId AND a.isDefault = true")
     Optional<Address> findDefaultByUserId(Long userId);
+
+    @Query("SELECT a FROM Address a WHERE a.userProfile = :userProfile AND a.isDefault = true")
+    Optional<Address> findDefaultByUserProfile(UserProfile userProfile);
+
+    @Query("select a from Address a where a.isGeocoded= 'PENDING' or a.isGeocoded='UPDATED'")
+    List<Address> findGeocoding(Pageable pageable);
 }

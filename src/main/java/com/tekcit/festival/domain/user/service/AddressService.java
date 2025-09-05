@@ -4,6 +4,7 @@ import com.tekcit.festival.domain.user.dto.request.AddressRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.UserProfile;
+import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import com.tekcit.festival.domain.user.repository.AddressRepository;
 import com.tekcit.festival.domain.user.repository.UserProfileRepository;
 import com.tekcit.festival.exception.BusinessException;
@@ -49,6 +50,7 @@ public class AddressService {
         address.setName(addressRequestDTO.getName());
         address.setPhone(addressRequestDTO.getPhone());
         address.setDefault(addressRequestDTO.isDefault());
+        address.setIsGeocoded(GeocodeStatus.UPDATED);
 
         addressRepository.save(address);
         return AddressDTO.fromEntity(address);

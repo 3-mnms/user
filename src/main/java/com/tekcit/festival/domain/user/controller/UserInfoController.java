@@ -1,6 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
+import org.springframework.security.core.Authentication;
 
-import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserInfoService;
 import com.tekcit.festival.exception.global.SuccessResponse;
@@ -83,6 +83,15 @@ public class UserInfoController {
         Long userId = Long.parseLong(principal);
         AssignmentDTO assignmentDTO = userInfoService.transferorInfo(userId);
         return ApiResponseUtil.success(assignmentDTO);
+    }
+
+    @GetMapping(value = "/geocodeInfo")
+    @Operation(summary = "사용자 위도 경도 정보 조회",
+            description = "사용자 위도 경도 정보 조회. ex) GET /api/users/geocodeInfo")
+    public ResponseEntity<SuccessResponse<GeoCodeInfoDTO>> geoCodeInfo(@AuthenticationPrincipal String principal){
+        Long userId = Long.parseLong(principal);
+        GeoCodeInfoDTO geoCodeInfo = userInfoService.geoCodeInfo(userId);
+        return ApiResponseUtil.success(geoCodeInfo);
     }
 
 }

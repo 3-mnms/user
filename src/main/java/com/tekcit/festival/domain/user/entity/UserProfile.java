@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.entity;
 
+import com.tekcit.festival.domain.user.enums.GeocodeStatus;
 import com.tekcit.festival.domain.user.enums.UserGender;
 import com.tekcit.festival.utils.ResidentUtil;
 import jakarta.persistence.*;
