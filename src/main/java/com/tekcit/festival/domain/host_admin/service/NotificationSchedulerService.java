@@ -64,7 +64,7 @@ public class NotificationSchedulerService {
 
         try {
             final ZoneId KST = ZoneId.of("Asia/Seoul");
-            log.info("스케줄러 실행 시각: {}", LocalDateTime.now(KST));
+            //log.info("스케줄러 실행 시각: {}", LocalDateTime.now(KST));
 
             // 현재 시각으로부터 1분 이내의 발송 예정 스케줄을 조회
             LocalDateTime now = LocalDateTime.now(KST).truncatedTo(ChronoUnit.MINUTES);
@@ -73,7 +73,7 @@ public class NotificationSchedulerService {
             // 아직 발송되지 않은 알림 스케줄만 DB에서 가져옴
             List<NotificationSchedule> schedules = scheduleRepository.findBySendTimeBetweenAndIsSentFalse(now, endOfWindow);
             if (schedules.isEmpty()) {
-                log.info("이번 분에 발송될 알림이 없습니다.");
+                //log.info("이번 분에 발송될 알림이 없습니다.");
                 return;
             }
 
@@ -99,7 +99,6 @@ public class NotificationSchedulerService {
                         .publishOn(Schedulers.boundedElastic()) // JPA와 같은 블로킹 작업 보호
                         .delaySubscription(Duration.ofSeconds(delayInSeconds)) // 발송 시각까지 대기
                         .doOnSuccess(response -> {
-                            // API 호출 성공 시 처리 로직
                             // API 호출 성공 시 처리 로직
                             if (response.isSuccess() && response.getData() != null && !response.getData().isEmpty()) {
                                 log.info("스케줄 ID {}에 대한 API 호출 성공. {}명의 사용자를 찾았습니다.", scheduleId, response.getData().size());
@@ -131,7 +130,7 @@ public class NotificationSchedulerService {
         } finally {
             // 스케줄러 락 해제
             schedulerLock.unlock();
-            log.info("스케줄러 락이 해제되었습니다.");
+            //log.info("스케줄러 락이 해제되었습니다.");
         }
     }
 

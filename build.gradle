@@ -33,6 +33,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-aop' // Slf4j 로그용 추가
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	// prometheus
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// MariaDB
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 

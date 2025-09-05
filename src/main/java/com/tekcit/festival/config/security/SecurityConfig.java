@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .logout(logout -> logout.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health/**", "/actuator/prometheus").permitAll()
                         .requestMatchers(
                                 "/api/users/signupUser",
                                 "/api/users/signupAdmin",
