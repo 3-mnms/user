@@ -92,7 +92,7 @@ public class UserInfoService {
         Address address = addressRepository.findDefaultByUserId(userId)
                 .orElseThrow(()-> new BusinessException(ErrorCode.ADDRESS_DEFAULT_NOT_FOUND));
 
-        if(address.getIsGeocoded() == GeocodeStatus.PENDING){
+        if(address.getIsGeocoded() == GeocodeStatus.PENDING || address.getIsGeocoded() == GeocodeStatus.UPDATED){
             boolean result = userGeocodeService.geocode(address);
             if(!result) {
                 log.info("geocode 실패 (결과 없음)");

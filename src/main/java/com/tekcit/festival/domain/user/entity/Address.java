@@ -28,6 +28,7 @@ public class Address {
 
     @Column(name = "phone", nullable = false)
     private String phone;
+
     @Column(name = "latitude",  columnDefinition = "DECIMAL(10,7)")
     private Double latitude; //위도
 
