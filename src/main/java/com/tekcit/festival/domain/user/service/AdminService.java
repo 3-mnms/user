@@ -110,6 +110,11 @@ public class AdminService {
         User adminUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        // 운영자 권한 확인
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED);
+        }
+
         List<Address> addresses = addressRepository.findAll();
 
         List<AddressDTO> addressDTOS = addresses.stream()

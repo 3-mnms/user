@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.domain.user.dto.api.AddressApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.AddressRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.service.AddressService;
@@ -20,12 +21,10 @@ import java.util.List;
 @RequestMapping("/api/addresses")
 @RequiredArgsConstructor
 @Tag(name = "주소 API", description = "주소 조회, 추가, 수정, 삭제, 기본 배송지 수정")
-public class AddressController {
+public class AddressController implements AddressApiSpecification {
     private final AddressService addressService;
 
     @PostMapping
-    @Operation(summary = "회원 주소 정보 추가",
-            description = "회원 주소 정보 추가, AddressRequestDTO를 포함해야 합니다. ex) POST /api/addresses")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> addAddress(@Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -34,8 +33,6 @@ public class AddressController {
     }
 
     @PatchMapping(value="/updateAddress/{addressId}")
-    @Operation(summary = "회원 주소 정보 수정",
-            description = "회원 주소 정보 수정, AddressRequestDTO를 포함해야 합니다. ex) PATCH /api/addresses/updateAddress/{addressId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> updateAddress(@PathVariable Long addressId, @Valid @RequestBody AddressRequestDTO addressRequestDTO, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -44,8 +41,6 @@ public class AddressController {
     }
 
     @PatchMapping(value="/changeDefault/{addressId}")
-    @Operation(summary = "회원 주소 기본 배송지 수정",
-            description = "회원 주소 기본 배송지 수정, ex) PATCH /api/addresses/changeDefault/{addressId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> updateDefault(@PathVariable Long addressId, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -54,8 +49,6 @@ public class AddressController {
     }
 
     @DeleteMapping(value="/{addressId}")
-    @Operation(summary = "회원 주소 삭제",
-            description = "회원 주소 삭제, ex) DELETE /api/addresses/deleteAddress/{addressId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId, @AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -64,8 +57,6 @@ public class AddressController {
     }
 
     @GetMapping(value="/allAddress")
-    @Operation(summary = "회원 주소 정보 전체 조회",
-            description = "회원 주소 정보 전체 조회 ex) GET /api/addresses/allAddress")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAllAddresses(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -74,8 +65,6 @@ public class AddressController {
     }
 
     @GetMapping(value="/defaultAddress")
-    @Operation(summary = "회원 주소 기본 배송지 조회",
-            description = "회원 주소 기본 배송지 정보 조회 ex) GET /api/addresses/defaultAddress")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<SuccessResponse<AddressDTO>> getDefaultAddress(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -84,11 +73,10 @@ public class AddressController {
     }
 
     @GetMapping(value="/{addressId}")
-    @Operation(summary = "회원 주소 정보 한 개 조회",
-            description = "회원 주소 정보 한 개 조회 ex) GET /api/addresses/{addressId}")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<SuccessResponse<AddressDTO>> getAddress(@PathVariable Long addressId){
-        AddressDTO addressDTO = addressService.getAddress(addressId);
+    public ResponseEntity<SuccessResponse<AddressDTO>> getAddress(@AuthenticationPrincipal String principal, @PathVariable Long addressId){
+        Long userId = Long.parseLong(principal);
+        AddressDTO addressDTO = addressService.getAddress(userId, addressId);
         return ApiResponseUtil.success(addressDTO);
     }
 

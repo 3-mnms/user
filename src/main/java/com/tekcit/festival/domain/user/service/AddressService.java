@@ -95,7 +95,10 @@ public class AddressService {
     }
 
     public List<AddressDTO> getAllAddresses(Long userId){
-        List<Address> addresses = addressRepository.findAllByUserId(userId);
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Address> addresses = addressRepository.findAllByUserProfile(userProfile);
 
         List<AddressDTO> addressDTOS = addresses.stream()
                 .map(address->AddressDTO.fromEntity(address))
@@ -105,6 +108,9 @@ public class AddressService {
     }
 
     public AddressDTO getDefaultAddress(Long userId){
+        userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Address address = addressRepository.findDefaultByUserId(userId)
                 .orElse(null);
 
@@ -115,9 +121,16 @@ public class AddressService {
         return addressDTO;
     }
 
-    public AddressDTO getAddress(Long addressId){
+    public AddressDTO getAddress(Long userId, Long addressId){
+        UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
+            throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
+        }
 
         AddressDTO addressDTO = AddressDTO.fromEntity(address);
         return addressDTO;

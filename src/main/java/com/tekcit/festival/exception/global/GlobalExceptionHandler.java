@@ -10,13 +10,30 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailSendException.class)
-    public ResponseEntity<?> handleEmailSendFailed(EmailSendException ex) {
-        return ResponseEntity.status(500).body("이메일 실패: " + ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleEmailSendFailed(EmailSendException ex) {
+        ErrorResponse response = new ErrorResponse(false, "EMAIL_ERROR", "이메일 실패: " + ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        ErrorResponse response = new ErrorResponse(false, "AUTHORIZATION_ERROR", "접근 권한이 없습니다.");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+        ErrorResponse response = new ErrorResponse(false, "AUTHENTICATION_ERROR", "로그인이 필요합니다.");
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     /**

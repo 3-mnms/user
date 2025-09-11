@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.domain.user.dto.api.KakaoAuthApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.KakaoSignupDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.KakaoService;
@@ -29,7 +30,7 @@ import java.io.IOException;
 @RequestMapping("/api/auth/kakao")
 @RequiredArgsConstructor
 @Tag(name = "카카오 회원가입, 로그인 API", description = "카카오 회원가입, 로그인, 로그아웃, 토큰 재발급")
-public class KakaoAuthController {
+public class KakaoAuthController implements KakaoAuthApiSpecification {
     @Value("${kakao.restapi-key}")
     private String clientId;
 
@@ -88,16 +89,6 @@ public class KakaoAuthController {
     }
 
     @PostMapping(value="/signupUser")
-    @Operation(summary = "회원 가입(일반 유저), 카카오 회원가입",
-            description = "일반 유저 회원 가입, SignupUserDTO를 포함해야 합니다. ex) POST /api/auth/kakao/signupUser")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 가입 성공(일반 유저)",
-                    content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
-            @ApiResponse(responseCode = "400", description = "회원 가입 실패 (잘못된 데이터, 필수 필드 누락)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "회원 가입 실패 (중복된 ID, Email로 인한 conflict)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
     public ResponseEntity<SuccessResponse<UserResponseDTO>> signupUser(@Valid @RequestBody KakaoSignupDTO kakaoSignupDTO,
                                                                       @CookieValue(value = "kakao_signup", required = false) String ticket,
                                                                       HttpServletResponse res) {

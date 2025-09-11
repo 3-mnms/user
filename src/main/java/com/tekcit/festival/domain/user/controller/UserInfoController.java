@@ -1,4 +1,5 @@
 package com.tekcit.festival.domain.user.controller;
+import com.tekcit.festival.domain.user.dto.api.UserInfoApiSpecification;
 import org.springframework.security.core.Authentication;
 
 import com.tekcit.festival.domain.user.dto.response.*;
@@ -20,13 +21,11 @@ import java.util.List;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Tag(name = "사용자 정보 조회 API", description = "예매, 통계 가예매자, 양수자, 양도자 정보 조회")
-public class UserInfoController {
+public class UserInfoController implements UserInfoApiSpecification {
 
     private final UserInfoService userInfoService;
 
     @GetMapping(value="/checkAge")
-    @Operation(summary = "사용자 나이 확인",
-            description = "사용자 나이 확인(age), ex) GET /api/users/checkAge")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessResponse<CheckAgeDTO>> checkUserAgeInfo(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -35,32 +34,24 @@ public class UserInfoController {
     }
 
     @GetMapping(value="/booking-profile/{userId}")
-    @Operation(summary = "예매 시 사용자 정보",
-            description = "예매 시 사용자 정보(email), ex) GET /api/users/booking-profile/{userId}")
-    public ResponseEntity<SuccessResponse<BookingProfileDTO>> bookingProfileInfo(@Valid @PathVariable Long userId){
+    public ResponseEntity<SuccessResponse<BookingProfileDTO>> bookingProfileInfo(@PathVariable Long userId){
         BookingProfileDTO bookingProfile = userInfoService.bookingProfileInfo(userId);
         return ApiResponseUtil.success(bookingProfile);
     }
 
     @PostMapping(value = "/reservationList")
-    @Operation(summary = "예매자 정보 조회",
-            description = "예매자 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/reservationList")
     public ResponseEntity<SuccessResponse<List<ReservationUserDTO>>> getReservationUserInfo(@RequestBody List<Long> userIds){
         List<ReservationUserDTO> reservationUserDTOS = userInfoService.getReservationUserInfo(userIds);
         return ApiResponseUtil.success(reservationUserDTOS);
     }
 
     @PostMapping(value = "/statisticsList")
-    @Operation(summary = "통계 정보 조회",
-            description = "통계 정보 조회, 예매자 userId가 리스트로 주어져야 합니다. ex) POST /api/users/statisticsList")
     public ResponseEntity<List<StatisticsDTO>> getStatisticsInfo(@RequestBody List<Long> userIds){
         List<StatisticsDTO> statisticsDTOS = userInfoService.getStatisticsInfo(userIds);
         return ResponseEntity.ok(statisticsDTOS);
     }
 
     @GetMapping(value = "/preReservation")
-    @Operation(summary = "가예매자 정보 조회",
-            description = "가예매자 정보 조회. ex) POST /api/users/preReservation")
     public ResponseEntity<SuccessResponse<PreReservationDTO>> getPreReservationInfo(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
         PreReservationDTO preReservationDTO = userInfoService.getPreReservationInfo(userId);
@@ -68,8 +59,6 @@ public class UserInfoController {
     }
 
     @GetMapping(value = "/transferee")
-    @Operation(summary = "양도 시 이메일을 통한 양수자 정보 조회",
-            description = "양도 시 이메일을 통한 양수자 정보 조회. ex) GET /api/users/transferee?email=test@test.com")
     public ResponseEntity<SuccessResponse<AssignmentDTO>> transfereeInfo(@AuthenticationPrincipal String principal, @RequestParam String email){
         Long userId = Long.parseLong(principal);
         AssignmentDTO assignmentDTO = userInfoService.transfereeInfo(userId, email);
@@ -77,8 +66,6 @@ public class UserInfoController {
     }
 
     @GetMapping(value = "/transferor")
-    @Operation(summary = "양도 시 현재 양도자 정보 조회",
-            description = "양도 시 현재 양도자 정보 조회. ex) GET /api/users/transferor?email=test@test.com")
     public ResponseEntity<SuccessResponse<AssignmentDTO>> transferorInfo(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
         AssignmentDTO assignmentDTO = userInfoService.transferorInfo(userId);
@@ -86,8 +73,6 @@ public class UserInfoController {
     }
 
     @GetMapping(value = "/geocodeInfo")
-    @Operation(summary = "사용자 위도 경도 정보 조회",
-            description = "사용자 위도 경도 정보 조회. ex) GET /api/users/geocodeInfo")
     public ResponseEntity<SuccessResponse<GeoCodeInfoDTO>> geoCodeInfo(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
         GeoCodeInfoDTO geoCodeInfo = userInfoService.geoCodeInfo(userId);
