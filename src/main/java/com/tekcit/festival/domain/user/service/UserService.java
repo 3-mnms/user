@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.service;
 
+import com.tekcit.festival.domain.host_admin.repository.FcmTokenRepository;
 import com.tekcit.festival.domain.user.dto.request.*;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.entity.*;
@@ -24,6 +25,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final KakaoOAuthService kakaoOAuthService;
+    private final FcmTokenRepository fcmTokenRepository;
 
     @Transactional
     public UserResponseDTO signupUser(@Valid SignupUserDTO signupUserDTO){
@@ -97,7 +99,7 @@ public class UserService {
                 throw new BusinessException(ErrorCode.KAKAO_UNLINK_FAILED, e.getMessage());
             }
         }
-
+        fcmTokenRepository.deleteByUser_UserId(userId);
         userRepository.delete(deleteUser);
     }
 
