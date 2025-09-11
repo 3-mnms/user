@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
+import com.tekcit.festival.domain.user.dto.api.AdminApiSpecification;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminHostListDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminUserListDTO;
@@ -22,13 +23,11 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Tag(name = "운영 관리자 api", description = "전체 회원 조회, 전체 주최자 조회")
-public class AdminController {
+public class AdminController implements AdminApiSpecification {
 
     private final AdminService adminService;
 
     @GetMapping(value="/userList")
-    @Operation(summary = "사용자 전체 목록 조회",
-            description = "사용자 전체 목록 조회(user), ex) GET /api/admin/userList")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<List<AdminUserListDTO>>> getAllUser(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -37,8 +36,6 @@ public class AdminController {
     }
 
     @GetMapping(value="/hostList")
-    @Operation(summary = "주최자 전체 목록 조회",
-            description = "주최자 전체 목록 조회(host), ex) GET /api/admin/hostList")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<List<AdminHostListDTO>>> getAllHostList(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);
@@ -47,13 +44,6 @@ public class AdminController {
     }
 
     @PatchMapping(value="/{userId}/state")
-    @Operation(summary = "회원 상태 변경 (활성화 / 비활성화)",
-            description = "운영관리자는 userId를 기준으로 회원의 활성 상태(active)를 true/false로 변경할 수 있습니다. ex) PATCH /api/admin/{userId}/state?active=false")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 상태(active) 조정 완료"),
-            @ApiResponse(responseCode = "403", description = "회원 상태(active) 조정 실패(운영 관리자는 불가능)"),
-            @ApiResponse(responseCode = "404", description = "회원 상태(active) 조정 실패(해당 유저를 찾을 수 없거나 운영 관리자만 상태 관리를 할 수 있습니다.)")
-    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<Void>> changeState(@PathVariable Long userId, @RequestParam boolean active, @AuthenticationPrincipal String principal){
         Long adminId = Long.parseLong(principal);
@@ -62,8 +52,6 @@ public class AdminController {
     }
 
     @DeleteMapping(value="/{userId}")
-    @Operation(summary = "주최자 탈퇴(삭제)",
-            description = "운영관리자가 주최자 탈퇴(host), ex) DELETE /api/admin/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse<Void>> deleteHost(@AuthenticationPrincipal String principal, @PathVariable Long userId){
         Long adminId = Long.parseLong(principal);
@@ -73,8 +61,6 @@ public class AdminController {
     }
 
     @GetMapping
-    @Operation(summary = "전체 회원 주소 정보 조회",
-            description = "회원 주소 정보 조회 ex) GET /api/admin/addresses")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<SuccessResponse<List<AddressDTO>>> getAllAddresses(@AuthenticationPrincipal String principal){
         Long userId = Long.parseLong(principal);

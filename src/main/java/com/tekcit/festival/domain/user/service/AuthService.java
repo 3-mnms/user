@@ -69,16 +69,16 @@ public class AuthService {
 
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
+        //cookie에서 refreshToken삭제
+        ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
         //refreshToken cookie에서 가져옴
         String refreshToken = cookieUtil.resolveRefreshToken(request);
 
         // refreshToken이 아예 없는 경우 처리
-        if (refreshToken == null)
+        if (refreshToken == null || refreshToken.isBlank())
             return;
-
-        //cookie에서 refreshToken삭제
-        ResponseCookie cookie = cookieUtil.deleteRefreshTokenCookie();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         Long userId = jwtTokenProvider.getUserId(refreshToken);
 
