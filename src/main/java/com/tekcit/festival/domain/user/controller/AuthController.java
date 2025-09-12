@@ -1,7 +1,7 @@
 package com.tekcit.festival.domain.user.controller;
 
 import com.tekcit.festival.config.security.token.JwtTokenProvider;
-import com.tekcit.festival.domain.user.dto.api.AuthApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.AuthApiSpecification;
 import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
@@ -14,11 +14,6 @@ import com.tekcit.festival.utils.TokenParseUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

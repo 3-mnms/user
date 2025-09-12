@@ -1,17 +1,12 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.api.UserApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.UserApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.*;
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
 import com.tekcit.festival.utils.CookieUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

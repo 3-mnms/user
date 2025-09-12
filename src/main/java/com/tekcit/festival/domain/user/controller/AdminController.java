@@ -1,15 +1,12 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.api.AdminApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.AdminApiSpecification;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminHostListDTO;
 import com.tekcit.festival.domain.user.dto.response.AdminUserListDTO;
 import com.tekcit.festival.domain.user.service.AdminService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

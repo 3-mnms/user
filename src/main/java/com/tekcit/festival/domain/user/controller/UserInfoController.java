@@ -1,14 +1,11 @@
 package com.tekcit.festival.domain.user.controller;
-import com.tekcit.festival.domain.user.dto.api.UserInfoApiSpecification;
-import org.springframework.security.core.Authentication;
+import com.tekcit.festival.domain.user.controller.api.UserInfoApiSpecification;
 
 import com.tekcit.festival.domain.user.dto.response.*;
 import com.tekcit.festival.domain.user.service.UserInfoService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -1,6 +1,6 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.api.MyPageApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.MyPageApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.CheckPwDTO;
 import com.tekcit.festival.domain.user.dto.request.ResetPwDTO;
 import com.tekcit.festival.domain.user.dto.request.UpdateUserRequestDTO;
@@ -8,11 +8,6 @@ import com.tekcit.festival.domain.user.dto.response.UpdateUserResponseDTO;
 import com.tekcit.festival.domain.user.service.MyPageService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
