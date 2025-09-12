@@ -1,4 +1,4 @@
-package com.tekcit.festival.domain.user.dto.api;
+package com.tekcit.festival.domain.user.controller.api;
 
 import com.tekcit.festival.domain.user.dto.request.FindLoginIdDTO;
 import com.tekcit.festival.domain.user.dto.request.FindPwEmailDTO;

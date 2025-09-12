@@ -1,20 +1,14 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.api.KakaoAuthApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.KakaoAuthApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.KakaoSignupDTO;
 import com.tekcit.festival.domain.user.dto.response.UserResponseDTO;
 import com.tekcit.festival.domain.user.service.KakaoService;
 import com.tekcit.festival.exception.BusinessException;
 import com.tekcit.festival.exception.ErrorCode;
-import com.tekcit.festival.exception.global.ErrorResponse;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
 import com.tekcit.festival.utils.CookieUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

@@ -1,12 +1,11 @@
 package com.tekcit.festival.domain.user.controller;
 
-import com.tekcit.festival.domain.user.dto.api.AddressApiSpecification;
+import com.tekcit.festival.domain.user.controller.api.AddressApiSpecification;
 import com.tekcit.festival.domain.user.dto.request.AddressRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.AddressDTO;
 import com.tekcit.festival.domain.user.service.AddressService;
 import com.tekcit.festival.exception.global.SuccessResponse;
 import com.tekcit.festival.utils.ApiResponseUtil;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
