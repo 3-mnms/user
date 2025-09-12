@@ -26,6 +26,10 @@ public class AddressService {
     public AddressDTO addAddress(AddressRequestDTO addressRequestDTO, Long userId){
         UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if(addressRequestDTO.isDefault()) {
+            addressRepository.findDefaultByUserId(userId)
+                    .ifPresent(Address::unsetDefault);
+        }
         Address address = addressRequestDTO.toAddressEntity(userProfile);
         userProfile.getAddresses().add(address);
 
@@ -43,6 +47,11 @@ public class AddressService {
 
         if (!address.getUserProfile().getUId().equals(userProfile.getUId())) {
             throw new BusinessException(ErrorCode.ADDRESS_NOT_ALLOWED);
+        }
+
+        if(addressRequestDTO.isDefault()) {
+            addressRepository.findDefaultByUserId(userId)
+                    .ifPresent(Address::unsetDefault);
         }
 
         address.setAddress(addressRequestDTO.getAddress());

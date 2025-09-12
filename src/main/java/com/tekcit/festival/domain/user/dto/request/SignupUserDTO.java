@@ -4,6 +4,7 @@ import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.enums.OAuthProvider;
 import com.tekcit.festival.domain.user.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -41,8 +42,10 @@ public class SignupUserDTO {
             message = "이메일 형식이 올바르지 않습니다.")
     private String email;
 
+    @Valid
     private UserProfileDTO userProfile; // USER일 때만
 
+    @Valid
     private HostProfileDTO hostProfile; // HOST일 때만
 
     public User toUserEntity(){

@@ -1,5 +1,6 @@
 package com.tekcit.festival.domain.user.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tekcit.festival.domain.user.entity.Address;
 import com.tekcit.festival.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,8 @@ public class AddressDTO {
     @Schema(description = "사용자 주소 우편번호")
     private String zipCode;
 
+    //isDefault로 인식하도록
+    @JsonProperty("isDefault")
     @Schema(description = "사용자 주소 기본 배송지 여부")
     private boolean isDefault;
 
