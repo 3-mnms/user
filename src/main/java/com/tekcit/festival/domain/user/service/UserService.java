@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class UserService {
         String rNum = userProfileDTO.getResidentNum();
         UserProfile userProfile = userProfileDTO.toEntity(ResidentUtil.calcAge(rNum), ResidentUtil.extractGender(rNum), ResidentUtil.calcBirth(rNum));
 
-        if(userProfileDTO.getAddress() != null && userProfileDTO.getZipCode() != null) {
+        if(StringUtils.hasText(userProfileDTO.getAddress()) && StringUtils.hasText(userProfileDTO.getZipCode())) {
             Address address = userProfileDTO.toAddressEntity(user, userProfile);
             userProfile.getAddresses().add(address);
         }
