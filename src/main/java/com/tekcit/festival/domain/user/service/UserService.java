@@ -48,8 +48,10 @@ public class UserService {
         String rNum = userProfileDTO.getResidentNum();
         UserProfile userProfile = userProfileDTO.toEntity(ResidentUtil.calcAge(rNum), ResidentUtil.extractGender(rNum), ResidentUtil.calcBirth(rNum));
 
-        Address address = userProfileDTO.toAddressEntity(user, userProfile);
-        userProfile.getAddresses().add(address);
+        if(userProfileDTO.getAddress() != null && userProfileDTO.getZipCode() != null) {
+            Address address = userProfileDTO.toAddressEntity(user, userProfile);
+            userProfile.getAddresses().add(address);
+        }
 
         userProfile.setUser(user);
         user.setUserProfile(userProfile);

@@ -26,11 +26,9 @@ public class UserProfileDTO {
     private String residentNum;
 
     @Schema(description = "회원 주소")
-    @NotBlank(message = "주소는 필수 입력사항 입니다.")
     private String address;
 
     @Schema(description = "회원 주소(우편 번호)")
-    @NotBlank(message = "우편 번호는 필수입니다.")
     private String zipCode;
 
     public UserProfile toEntity(int age, UserGender gender, String birth){

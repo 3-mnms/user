@@ -76,7 +76,7 @@ public interface AddressApiSpecification {
                                 {
                                    "success": false,
                                    "code": "ADDRESS_NOT_ALLOWED",
-                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다."
+                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 조회 또는 수정 또는 삭제할 수 있습니다."
                                  }
                             """
             )
@@ -109,7 +109,7 @@ public interface AddressApiSpecification {
                                 {
                                    "success": false,
                                    "code": "ADDRESS_NOT_ALLOWED",
-                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다."
+                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 조회 또는 수정 또는 삭제할 수 있습니다."
                                  }
                             """
             )
@@ -155,7 +155,7 @@ public interface AddressApiSpecification {
                                 {
                                    "success": false,
                                    "code": "ADDRESS_NOT_ALLOWED",
-                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다."
+                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 조회 또는 수정 또는 삭제할 수 있습니다."
                                  }
                             """
             )
@@ -229,7 +229,7 @@ public interface AddressApiSpecification {
                                 {
                                    "success": false,
                                    "code": "ADDRESS_NOT_ALLOWED",
-                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다."
+                                   "message": "허용되지 않는 행동입니다. 작성자만이 주소를 조회 또는 수정 또는 삭제할 수 있습니다."
                                  }
                             """
             )

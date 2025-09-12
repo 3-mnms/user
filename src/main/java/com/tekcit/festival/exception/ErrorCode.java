@@ -16,7 +16,7 @@ public enum ErrorCode {
     USER_EMAIL_NOT_MATCH("U007", "이메일이 일치하지 않습니다. EMAIL: %s", HttpStatus.BAD_REQUEST),
     ADDRESS_NOT_FOUND("U008", "주소가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     ADDRESS_DEFAULT_NOT_FOUND("U009", "기본 주소가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-    ADDRESS_NOT_ALLOWED("U010", "허용되지 않는 행동입니다. 작성자만이 주소를 수정 또는 삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
+    ADDRESS_NOT_ALLOWED("U010", "허용되지 않는 행동입니다. 작성자만이 주소를 조회 또는 수정 또는 삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
     ADDRESS_DEFAULT_NOT_DELETED("U011", "기본 주소지는 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     INVALID_RESIDENT_NUMBER("U012", "올바르지 못한 주민번호입니다.", HttpStatus.BAD_REQUEST),
     SELF_TRANSFER_FORBIDDEN("U013", "본인에게는 양도를 할 수 없습니다.", HttpStatus.BAD_REQUEST),
