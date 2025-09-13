@@ -60,6 +60,13 @@ public class User extends BaseEntity {
     @Column(name = "oauth_provider_id", length = 100)
     private String oauthProviderId; // 예: 카카오 id(문자열)
 
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private Long tokenVersion = 0L; // 토큰 버전
+
+    @Column(name = "session_id")
+    private String sessionId; // 현재 세션 id
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserProfile userProfile;
 
@@ -91,5 +98,13 @@ public class User extends BaseEntity {
             }
             default -> throw new BusinessException(ErrorCode.KAKAO_INVALID_FIELDS, "지원하지 않는 oauthProvider: " + oauthProvider);
         }
+    }
+
+    public void rotateSession() {
+        this.tokenVersion += 1;
+        this.sessionId = java.util.UUID.randomUUID().toString();
+    }
+    public void clearSessionOnLogout() {
+        this.sessionId = null;
     }
 }

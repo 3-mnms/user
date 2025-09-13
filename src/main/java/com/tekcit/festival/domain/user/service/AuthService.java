@@ -3,6 +3,7 @@ package com.tekcit.festival.domain.user.service;
 import com.tekcit.festival.config.security.userdetails.CustomUserDetails;
 import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
+import com.tekcit.festival.domain.user.dto.response.LoginConflictDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.domain.user.entity.User;
 import com.tekcit.festival.domain.user.enums.UserRole;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tekcit.festival.exception.ErrorCode;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +40,7 @@ public class AuthService {
 //    private final UserEventProducer userEventProducer;
 
     @Transactional
-    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+    public Object tryLogin(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         Authentication authentication;
 
         try {
@@ -52,11 +54,32 @@ public class AuthService {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-
         checkState(user);
 
-        String accessToken = jwtTokenProvider.createAccessToken(user);
-        String refreshToken = jwtTokenProvider.createRefreshToken(user);
+        if(user.getSessionId() != null) { //이미 로그인하고 있는 사용자
+            String ticket = jwtTokenProvider.createLoginConfirmTicket(user.getUserId());
+            return LoginConflictDTO.fromTicket(ticket);
+        }
+
+        return login(user, response);
+    }
+
+    @Transactional
+    public LoginResponseDTO confirmLogin(String ticket, HttpServletResponse response) {
+        Long userId = jwtTokenProvider.parseLoginConfirmTicket(ticket);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        checkState(user);
+        return login(user, response);
+    }
+
+    @Transactional
+    public LoginResponseDTO login(User user, HttpServletResponse response) {
+        user.rotateSession();
+        String accessToken = jwtTokenProvider.createAccessToken(user, user.getTokenVersion(), user.getSessionId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user, user.getTokenVersion(), user.getSessionId());
 
         user.updateRefreshToken(refreshToken);
         userRepository.save(user);
@@ -87,6 +110,7 @@ public class AuthService {
 
         userRepository.findById(userId).ifPresent(user -> {
             user.updateRefreshToken(null);
+            user.clearSessionOnLogout();
             userRepository.save(user);
         });
     }
@@ -115,8 +139,15 @@ public class AuthService {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_NOT_MATCH);
         }
 
+        Claims c = jwtTokenProvider.getAllClaims(refreshToken);
+        Long tokenVersion = (c.get("ver", Long.class));
+        String sessionId = c.get("sid", String.class);
+        if ((tokenVersion != user.getTokenVersion()) || !(sessionId.equals(user.getSessionId()))) {
+            throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_NOT_MATCH);
+        }
+
         //새로운 accessToken 생성
-        String newAccessToken = jwtTokenProvider.createAccessToken(user);
+        String newAccessToken = jwtTokenProvider.createAccessToken(user, user.getTokenVersion(), user.getSessionId());
 
         return LoginResponseDTO.fromToken(newAccessToken);
     }
