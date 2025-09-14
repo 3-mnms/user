@@ -79,8 +79,8 @@ public class AuthService {
     @Transactional
     public LoginResponseDTO login(User user, HttpServletResponse response) {
         user.rotateSession();
-        String accessToken = jwtTokenProvider.createAccessToken(user, user.getTokenVersion(), user.getSessionId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user, user.getTokenVersion(), user.getSessionId());
+        String accessToken = jwtTokenProvider.createAccessToken(user);
+        String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
         user.updateRefreshToken(refreshToken);
         userRepository.save(user);
@@ -148,7 +148,7 @@ public class AuthService {
         }
 
         //새로운 accessToken 생성
-        String newAccessToken = jwtTokenProvider.createAccessToken(user, user.getTokenVersion(), user.getSessionId());
+        String newAccessToken = jwtTokenProvider.createAccessToken(user);
 
         return LoginResponseDTO.fromToken(newAccessToken);
     }

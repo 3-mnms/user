@@ -73,7 +73,7 @@ public class JwtTokenProvider {
     }
 
     // 액세스 토큰 생성
-    public String createAccessToken(User user, long ver, String sid) {
+    public String createAccessToken(User user) {
         Date now = new Date();
         Date expiration = new Date(now.getTime()+accessValidMs);
 
@@ -82,8 +82,6 @@ public class JwtTokenProvider {
                 .setSubject(String.valueOf(user.getUserId()))
                 .claim("role", user.getRole().name())
                 .claim("name", user.getName())
-                .claim("ver", ver)
-                .claim("sid", sid)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .serializeToJsonWith(jsonSerializer) // ★ 여기!
@@ -92,15 +90,13 @@ public class JwtTokenProvider {
     }
 
     // 리프레시 토큰 생성
-    public String createRefreshToken(User user, long ver, String sid) {
+    public String createRefreshToken(User user) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshValidMs);
 
         return Jwts.builder()
                 .setIssuer(issuer)
                 .setSubject(String.valueOf(user.getUserId()))
-                .claim("ver", ver)
-                .claim("sid", sid)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .serializeToJsonWith(jsonSerializer) // ★ 여기!
