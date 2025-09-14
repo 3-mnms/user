@@ -2,6 +2,7 @@ package com.tekcit.festival.domain.user.controller.api;
 
 import com.tekcit.festival.domain.user.dto.request.LoginRequestDTO;
 import com.tekcit.festival.domain.user.dto.response.AccessTokenInfoDTO;
+import com.tekcit.festival.domain.user.dto.response.LoginConflictDTO;
 import com.tekcit.festival.domain.user.dto.response.LoginResponseDTO;
 import com.tekcit.festival.exception.global.ErrorResponse;
 import com.tekcit.festival.exception.global.SuccessResponse;
@@ -16,11 +17,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public interface AuthApiSpecification {
     @Operation(summary = "로그인",
             description = "로그인 기능, LoginRequestDTO를 포함해야 합니다. ex) POST /api/users/login")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공 또는 충돌",
+                    content = @Content(schema = @Schema(
+                            oneOf = { LoginResponseDTO.class, LoginConflictDTO.class }
+                    ))
+            ),
             @ApiResponse(responseCode = "400", description = "일치하지 않는 비밀번호 or 필수 입력 사항 위반 ", content = @Content(
                     mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
                     summary = "일치하지 않는 비밀번호 or 필수 입력 사항 위반(아이디, 비밀번호)",
@@ -29,6 +36,19 @@ public interface AuthApiSpecification {
                                    "success": false,
                                    "code": "AUTH_PASSWORD_NOT_EQUAL_ERROR or VALIDATION_ERROR",
                                    "message": "일치하지 않는 비밀번호입니다. or %s는 필수 입력사항 입니다."
+                                 }
+                            """
+            )
+            )
+            ),
+            @ApiResponse(responseCode = "403", description = "정지된 계정 ", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
+                    summary = "정지된 계정(ROLE: USER, HOST 만 정지 가능)",
+                    value = """
+                                {
+                                   "success": false,
+                                   "code": "USER_DEACTIVATED",
+                                   "message": "정지된 계정입니다. 관리자 이메일로 문의하세요."
                                  }
                             """
             )
@@ -49,7 +69,69 @@ public interface AuthApiSpecification {
             )
     }
     )
-    ResponseEntity<SuccessResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response);
+    ResponseEntity<SuccessResponse<Object>> login(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response);
+
+    @Operation(summary = "중복 로그인 시 로그인",
+            description = "로그인 기능, ticket(confirmLoginTicket: 2분 후 만료)을 포함해야 합니다. ex) POST /api/users/login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "잘못된 로그인 확인 티켓", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
+                    summary = "로그인 확인 티켓이 잘못된 경우 or 티켓 userId값이 null or 그 외 모든 잘못된 티켓일 경우",
+                    value = """
+                                {
+                                   "success": false,
+                                   "code": "LOGIN_CONFIRM_MISMATCH or LOGIN_CONFIRM_INVALID",
+                                   "message": "잘못된 로그인 확인 티켓입니다. or userId 값이 없습니다. or 로그인 확인 티켓이 유효하지 않습니다."
+                                 }
+                            """
+            )
+            )
+            ),
+            @ApiResponse(responseCode = "403", description = "정지된 계정 ", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
+                    summary = "정지된 계정(ROLE: USER, HOST 만 정지 가능)",
+                    value = """
+                                {
+                                   "success": false,
+                                   "code": "USER_DEACTIVATED",
+                                   "message": "정지된 계정입니다. 관리자 이메일로 문의하세요."
+                                 }
+                            """
+            )
+            )
+            ),
+            @ApiResponse(responseCode = "404", description = "사용자 조회 실패", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
+                    summary = "user를 찾을 수 없음",
+                    value = """
+                                {
+                                   "success": false,
+                                   "code": "USER_NOT_FOUND",
+                                   "message": "해당 사용자를 찾을 수 없습니다. ID: %s"
+                                 }
+                            """
+            )
+            )
+            ),
+            @ApiResponse(responseCode = "410", description = "로그인 확인 티켓 만료", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(
+                    summary = "로그인 확인 티켓 만료(2분 지났을 경우)",
+                    value = """
+                                {
+                                   "success": false,
+                                   "code": "LOGIN_CONFIRM_EXPIRED",
+                                   "message": "로그인 확인이 만료되었습니다."
+                                 }
+                            """
+            )
+            )
+            )
+    }
+    )
+    ResponseEntity<SuccessResponse<LoginResponseDTO>> confirmLogin(@RequestParam("ticket") String ticket, HttpServletResponse response);
 
     @Operation(summary = "로그아웃",
             description = "로그아웃 기능 ex) POST /api/users/logout")
