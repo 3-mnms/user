@@ -31,9 +31,15 @@ public class AuthController implements AuthApiSpecification {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response) {
-        LoginResponseDTO loginResult = authService.login(request, response);
+    public ResponseEntity<SuccessResponse<Object>> login(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response) {
+        Object loginResult = authService.tryLogin(request, response);
         return ApiResponseUtil.success(loginResult);
+    }
+
+    @PostMapping("/login/confirm")
+    public ResponseEntity<SuccessResponse<LoginResponseDTO>> confirmLogin(@RequestParam("ticket") String ticket, HttpServletResponse response) {
+        LoginResponseDTO confirmLoginResult = authService.confirmLogin(ticket, response);
+        return ApiResponseUtil.success(confirmLoginResult);
     }
 
     @PostMapping("/logout")

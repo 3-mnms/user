@@ -64,6 +64,7 @@ public class AuthService {
         return login(user, response);
     }
 
+    //confirmLoginTicket 유효 여부 확인(보안 위해) 2분 후 만료
     @Transactional
     public LoginResponseDTO confirmLogin(String ticket, HttpServletResponse response) {
         Long userId = jwtTokenProvider.parseLoginConfirmTicket(ticket);

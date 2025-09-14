@@ -47,7 +47,7 @@ public class JwtTokenProvider {
     @Value("${signup.ticket.valid-ms}") // 기본 10분
     private long signupTicketValidMs;
 
-    @Value("{login.confirm.valid-ms")
+    @Value("${login.confirm.valid-ms}")
     private long loginConfirmTicketValidMs;
 
     private PrivateKey privateKey;
@@ -229,14 +229,17 @@ public class JwtTokenProvider {
                     .getBody();
 
             if (!"login-confirm".equals(c.getSubject())) {
-                throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID_TICKET, "잘못된 로그인 확인 티켓입니다.");
+                throw new BusinessException(ErrorCode.LOGIN_CONFIRM_MISMATCH, "잘못된 로그인 확인 티켓입니다.");
             }
-            return c.get("userId", Long.class);
-
+            Long userId = c.get("userId", Long.class);
+            if(userId == null){
+                throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID, "userId 값이 없습니다.");
+            }
+            return userId;
         } catch (ExpiredJwtException e) {
-            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID_TICKET, "로그인 확인이 만료되었습니다.");
+            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_EXPIRED, "로그인 확인이 만료되었습니다.");
         } catch (JwtException | IllegalArgumentException e) {
-            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID_TICKET, "로그인 확인 티켓이 유효하지 않습니다.");
+            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID, "로그인 확인 티켓이 유효하지 않습니다.");
         }
     }
 
