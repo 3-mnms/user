@@ -52,16 +52,21 @@ public class NotificationScheduleController {
         return ResponseEntity.ok(new SuccessResponse<>(true, data, "✏️ 공지 알림 수정 완료"));
     }
 
-    @Operation(summary = "공지 알림 삭제", description = "실행되지 않는 등록된 알림에 한해 알림을 삭제합니다. (HOST만 가능, 본인 소유만)")
+    @Operation(summary = "공지 알림 삭제", description = "공지 스케줄은 삭제 하지만, 유저에서 발송된 히스토리는 삭제 X. (HOST는 본인 소유만, ADMIN은 전체 )")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('HOST')")
+    @PreAuthorize("hasAnyRole('HOST', 'ADMIN')")
     public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long id) {
         Long userId = getUserIdFromSecurityContext();
-        scheduleService.delete(id, userId);
-        return ResponseEntity.ok(new SuccessResponse<>(true, null, "🗑️ 예약 삭제 완료"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        scheduleService.delete(id, userId, isAdmin);
+        return ResponseEntity.ok(new SuccessResponse<>(true, null, "🗑️ 공지 알림 삭제 완료"));
     }
 
-    @Operation(summary = "전체 공지 알림 조회", description = "모든 공지 알림 알림을 조회합니다. (HOST는 본인 소유만, ADMIN은 전체 )")
+    @Operation(summary = "전체 공지 알림 조회", description = "모든 공지 알림을 조회합니다. (HOST는 본인 소유만, ADMIN은 전체 )")
     @GetMapping
     @PreAuthorize("hasAnyRole('HOST', 'ADMIN')")
     public ResponseEntity<SuccessResponse<List<NotificationScheduleResponseDTO>>> getAll() {

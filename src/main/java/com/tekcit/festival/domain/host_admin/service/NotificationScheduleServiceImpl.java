@@ -95,16 +95,12 @@ public class NotificationScheduleServiceImpl implements NotificationScheduleServ
 
     @Override
     @Transactional
-    public void delete(Long id, Long userId) {
+    public void delete(Long id, Long userId, boolean isAdmin) {
         NotificationSchedule e = scheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
-        // 1. 이미 발송된 알림인지 검증
-        //if (e.isSent()) {
-        //    throw new BusinessException(ErrorCode.ALREADY_SENT_NOTIFICATION);
-        //}
-        // 2. 소유권 검증
-        if (!e.getUserId().equals(userId)) {
+        // 1. 소유권 검증 (ADMIN은 예외)
+        if (!isAdmin && !e.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_RESOURCE);
         }
 
