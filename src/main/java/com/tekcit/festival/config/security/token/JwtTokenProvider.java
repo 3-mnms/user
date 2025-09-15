@@ -90,13 +90,14 @@ public class JwtTokenProvider {
     }
 
     // 리프레시 토큰 생성
-    public String createRefreshToken(User user) {
+    public String createRefreshToken(User user, String sid) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshValidMs);
 
         return Jwts.builder()
                 .setIssuer(issuer)
                 .setSubject(String.valueOf(user.getUserId()))
+                .claim("sid", sid)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .serializeToJsonWith(jsonSerializer) // ★ 여기!

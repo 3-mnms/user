@@ -76,9 +76,12 @@ public class KakaoAuthController implements KakaoAuthApiSpecification {
             return;
         }
         else {
-            kakaoService.login(result.kakaoId(), response);
+            boolean duplicateLogin = kakaoService.login(result.kakaoId(), response);
             response.addHeader("Set-Cookie", cookieUtil.deleteKakaoSignupCookie().toString());
-            response.sendRedirect(frontendLoginUrl);
+            if(duplicateLogin)
+                response.sendRedirect(frontendLoginUrl+"?duplicate=true");
+            else
+                response.sendRedirect(frontendLoginUrl);
         }
     }
 

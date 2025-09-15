@@ -103,7 +103,7 @@ public class KakaoService {
     }
 
     @Transactional
-    public void login(String kakaoId, HttpServletResponse response) {
+    public boolean login(String kakaoId, HttpServletResponse response) {
         User user = userRepository.findByOauthProviderAndOauthProviderId(OAuthProvider.KAKAO, kakaoId)
                 .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -111,13 +111,19 @@ public class KakaoService {
             throw new BusinessException(ErrorCode.USER_DEACTIVATED);
         }
 
-        String refreshToken = jwtTokenProvider.createRefreshToken(user);
+        boolean duplicateLogin = false;
+        if(user.getSessionId() != null) {
+            duplicateLogin = true;
+        }
+        user.rotateSession();
+        String refreshToken = jwtTokenProvider.createRefreshToken(user, user.getSessionId());
 
         user.updateRefreshToken(refreshToken);
         userRepository.save(user);
 
         ResponseCookie cookie = cookieUtil.createRefreshTokenCookie(refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return duplicateLogin;
     }
 
     public record KakaoCallbackResult(boolean isNew, String signupTicket, String kakaoId) {}

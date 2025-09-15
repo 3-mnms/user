@@ -80,7 +80,7 @@ public class AuthService {
     public LoginResponseDTO login(User user, HttpServletResponse response) {
         user.rotateSession();
         String accessToken = jwtTokenProvider.createAccessToken(user);
-        String refreshToken = jwtTokenProvider.createRefreshToken(user);
+        String refreshToken = jwtTokenProvider.createRefreshToken(user, user.getSessionId());
 
         user.updateRefreshToken(refreshToken);
         userRepository.save(user);
@@ -141,9 +141,8 @@ public class AuthService {
         }
 
         Claims c = jwtTokenProvider.getAllClaims(refreshToken);
-        Long tokenVersion = (c.get("ver", Long.class));
         String sessionId = c.get("sid", String.class);
-        if ((tokenVersion != user.getTokenVersion()) || !(sessionId.equals(user.getSessionId()))) {
+        if (!(sessionId.equals(user.getSessionId()))) {
             throw new BusinessException(ErrorCode.AUTH_REFRESH_TOKEN_NOT_MATCH);
         }
 
