@@ -49,19 +49,4 @@ public class CustomUserDetails implements UserDetails {
         return true; // 자격 만료 여부
     }
 
-    @Override
-    public boolean isEnabled() {
-        // 일반 사용자일 경우
-        if (user.getRole() == UserRole.USER && user.getUserProfile() != null) {
-            return user.getUserProfile().isActive();
-        }
-
-        // 축제 주최측일 경우
-        if (user.getRole() == UserRole.HOST && user.getHostProfile() != null) {
-            return user.getHostProfile().isActive();
-        }
-
-        // 운영관리자는 항상 활성
-        return true;
-    }
 }
