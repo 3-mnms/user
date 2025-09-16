@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/api/users/findRegisteredEmail",
                                 "/api/users/resetPasswordEmail",
                                 "/api/users/login",
+                                "/api/users/login/confirm",
                                 "/api/auth/kakao/signupUser"
                         ).anonymous()
                         .requestMatchers(

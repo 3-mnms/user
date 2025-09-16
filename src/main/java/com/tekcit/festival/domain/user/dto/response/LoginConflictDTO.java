@@ -7,24 +7,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "로그인 응답 DTO", name = "LoginResponseDTO")
+@Schema(description = "동시 로그인 응답 DTO", name = "LoginConflictDTO")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginResponseDTO {
-
-    @Schema(description = "JWT 액세스 토큰")
-    private String accessToken;
+public class LoginConflictDTO {
+    @Schema(description = "로그인 confirm ticket")
+    private String loginTicket;
 
     @Schema(description = "로그인 상태")
     private LoginStatus kind;
 
-    public static LoginResponseDTO fromToken(String accessToken) {
-        return LoginResponseDTO.builder()
-                .accessToken(accessToken)
-                .kind(LoginStatus.SUCCESS)
+    public static LoginConflictDTO fromTicket(String loginTicket) {
+        return LoginConflictDTO.builder()
+                .loginTicket(loginTicket)
+                .kind(LoginStatus.CONFLICT)
                 .build();
     }
-
 }

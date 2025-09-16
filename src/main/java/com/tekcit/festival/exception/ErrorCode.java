@@ -29,6 +29,9 @@ public enum ErrorCode {
     AUTH_REFRESH_TOKEN_NOT_MATCH("A005", "Refresh Token이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     AUTH_NOT_ALLOWED("A006", "허용되지 않는 행동입니다.", HttpStatus.FORBIDDEN),
     AUTH_TOKEN_MISSING("A007", "토큰이 없습니다.", HttpStatus.BAD_REQUEST),
+    LOGIN_CONFIRM_MISMATCH("A008", "%s", HttpStatus.BAD_REQUEST),
+    LOGIN_CONFIRM_INVALID("A009", "%s", HttpStatus.BAD_REQUEST),
+    LOGIN_CONFIRM_EXPIRED("A011", "%s", HttpStatus.GONE),
 
     // 이메일 인증 에러
     EMAIL_VERIFICATION_NOT_FOUND("E001", "인증 요청이 없습니다.", HttpStatus.NOT_FOUND),

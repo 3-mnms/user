@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import com.tekcit.festival.domain.user.entity.User;
 import io.jsonwebtoken.jackson.io.JacksonSerializer; // jjwt-jackson
@@ -29,10 +30,10 @@ import java.util.Map;
 @Slf4j
 public class JwtTokenProvider {
     @Value("${jwt.private-pem-path}")
-    private org.springframework.core.io.Resource privatePemPath;
+    private Resource privatePemPath;
 
     @Value("${jwt.public-pem-path}")
-    private org.springframework.core.io.Resource publicPemPath;
+    private Resource publicPemPath;
 
     @Value("${jwt.access-valid-ms}")
     private long accessValidMs;
@@ -45,6 +46,9 @@ public class JwtTokenProvider {
 
     @Value("${signup.ticket.valid-ms}") // 기본 10분
     private long signupTicketValidMs;
+
+    @Value("${login.confirm.valid-ms}")
+    private long loginConfirmTicketValidMs;
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -86,13 +90,14 @@ public class JwtTokenProvider {
     }
 
     // 리프레시 토큰 생성
-    public String createRefreshToken(User user) {
+    public String createRefreshToken(User user, String sid) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshValidMs);
 
         return Jwts.builder()
                 .setIssuer(issuer)
                 .setSubject(String.valueOf(user.getUserId()))
+                .claim("sid", sid)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .serializeToJsonWith(jsonSerializer) // ★ 여기!
@@ -109,6 +114,22 @@ public class JwtTokenProvider {
                 .setSubject("kakao-signup")
                 .claim("kakaoId", kakaoId)                    // kakaoId
                 .claim("email", email)                    // email
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .serializeToJsonWith(jsonSerializer)
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .compact();
+    }
+
+    //아무나 특정 사용자의 기존 세션을 끊는 DoS 방지를 위해
+    public String createLoginConfirmTicket(Long userId){
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + loginConfirmTicketValidMs);
+
+        return Jwts.builder()
+                .setIssuer(issuer)
+                .setSubject("login-confirm")
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .serializeToJsonWith(jsonSerializer)
@@ -192,6 +213,30 @@ public class JwtTokenProvider {
             throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 만료되었습니다.");
         } catch (JwtException | IllegalArgumentException e) { // 서명 오류, 위조, 포맷 오류 등
             throw new BusinessException(ErrorCode.KAKAO_INVALID_TICKET, "가입 티켓이 유효하지 않습니다.");
+        }
+    }
+
+    public Long parseLoginConfirmTicket(String token){
+        try {
+            Claims c = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .setAllowedClockSkewSeconds(30)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            if (!"login-confirm".equals(c.getSubject())) {
+                throw new BusinessException(ErrorCode.LOGIN_CONFIRM_MISMATCH, "잘못된 로그인 확인 티켓입니다.");
+            }
+            Long userId = c.get("userId", Long.class);
+            if(userId == null){
+                throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID, "userId 값이 없습니다.");
+            }
+            return userId;
+        } catch (ExpiredJwtException e) {
+            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_EXPIRED, "로그인 확인이 만료되었습니다.");
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.LOGIN_CONFIRM_INVALID, "로그인 확인 티켓이 유효하지 않습니다.");
         }
     }
 
