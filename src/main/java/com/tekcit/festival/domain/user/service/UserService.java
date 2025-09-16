@@ -113,6 +113,10 @@ public class UserService {
         User findUser = userRepository.findByNameAndEmail(name, email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 아이디가 없습니다.");
+        }
+
         return findUser.getLoginId();
     }
 
@@ -130,6 +134,10 @@ public class UserService {
     public void resetPasswordEmail(FindPwResetDTO findPwResetDTO){
         User findUser = userRepository.findByLoginId(findPwResetDTO.getLoginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (findUser.getOauthProvider() != OAuthProvider.LOCAL) {
+            throw new BusinessException(ErrorCode.AUTH_NOT_ALLOWED, "카카오 계정은 비밀번호가 없습니다.");
+        }
 
         if(!findUser.getEmail().equals(findPwResetDTO.getEmail()))
             throw new BusinessException(ErrorCode.USER_EMAIL_NOT_MATCH);
