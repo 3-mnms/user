@@ -27,7 +27,6 @@ public class FcmService {
 
     private final FcmTokenRepository fcmTokenRepository;
 
-    // 발송 실패 시 유효하지 않은 토큰을 DB에서 삭제
     @Transactional
     public void sendMessageToUsers(List<Long> userIds, String title, String body) {
         List<String> tokens = fcmTokenRepository.findTokensByUserIds(userIds);
@@ -36,28 +35,18 @@ public class FcmService {
             log.warn("전송할 FCM 토큰 없음 - 메시지 미전송");
             return;
         }
-        Map<String, String> data = new HashMap<>();
-        data.put("title", title);
-        data.put("body", body);
 
         MulticastMessage multicastMessage = MulticastMessage.builder()
-                .putAllData(data)
+                .putData("title", title)
+                .putData("body", body)
                 .addAllTokens(tokens)
                 .build();
-
-        /*MulticastMessage multicastMessage = MulticastMessage.builder()
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body).build())
-                .addAllTokens(tokens)
-                .build();*/
 
         try {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(multicastMessage);
             log.info("FCM 멀티캐스트 메시지 전송 결과: 총 {}개, 성공 {}개, 실패 {}개",
                     response.getResponses().size(), response.getSuccessCount(), response.getFailureCount());
 
-            // 유효하지 않은 토큰들을 데이터베이스에서 삭제
             if (response.getFailureCount() > 0) {
                 Set<String> failedTokens = response.getResponses().stream()
                         .filter(r -> !r.isSuccessful())

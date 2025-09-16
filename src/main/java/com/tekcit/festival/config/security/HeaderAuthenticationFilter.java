@@ -97,6 +97,9 @@ class HeaderAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
-        return "OPTIONS".equals(method) || path.startsWith("/actuator");
+
+        return "OPTIONS".equals(method)
+                || path.startsWith("/actuator")
+                || path.startsWith("/api/users/statisticsList");
     }
 }
