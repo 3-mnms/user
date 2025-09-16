@@ -39,6 +39,10 @@ public class FcmService {
         MulticastMessage multicastMessage = MulticastMessage.builder()
                 .putData("title", title)
                 .putData("body", body)
+                //.setNotification(Notification.builder()
+                //        .setTitle(title)
+                //        .setBody(body)
+                //        .build())
                 .addAllTokens(tokens)
                 .build();
 
@@ -62,10 +66,10 @@ public class FcmService {
         }
     }
 
-    // FCM 토큰을 저장하거나 이미 존재하는 경우 갱신합니다.
+    // FCM 토큰을 저장하거나 이미 존재하는 경우 갱신
     @Transactional
     public void saveToken(User user, String token) {
-        // 기존 토큰을 찾고, 없다면 새로운 엔티티를 생성합니다.
+        // 기존 토큰을 찾고, 없다면 새로운 엔티티를 생성
         FcmToken fcmTokenToSave = fcmTokenRepository.findByUser(user)
                 .map(existing -> {
                     // 기존 토큰이 존재하면 값만 업데이트하고 반환
@@ -78,7 +82,7 @@ public class FcmService {
         fcmTokenRepository.save(fcmTokenToSave);
     }
 
-    // 특정 FCM 토큰이 유효한지 테스트하기 위해 단일 알림을 전송합니다.
+    // 특정 FCM 토큰이 유효한지 테스트하기 위해 단일 알림을 전송
     public void validateTokenAndSend(String targetToken) {
         try {
             Message message = Message.builder()
