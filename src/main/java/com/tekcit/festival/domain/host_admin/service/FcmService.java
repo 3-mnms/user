@@ -37,12 +37,14 @@ public class FcmService {
         }
 
         MulticastMessage multicastMessage = MulticastMessage.builder()
+                // data payload (웹에서 사용)
                 .putData("title", title)
                 .putData("body", body)
-                //.setNotification(Notification.builder()
-                //        .setTitle(title)
-                //        .setBody(body)
-                //        .build())
+                // notification payload (모바일 크롬 OS 알림에 사용)
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
                 .addAllTokens(tokens)
                 .build();
 
@@ -50,16 +52,6 @@ public class FcmService {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(multicastMessage);
             log.info("FCM 멀티캐스트 메시지 전송 결과: 총 {}개, 성공 {}개, 실패 {}개",
                     response.getResponses().size(), response.getSuccessCount(), response.getFailureCount());
-
-            if (response.getFailureCount() > 0) {
-                Set<String> failedTokens = response.getResponses().stream()
-                        .filter(r -> !r.isSuccessful())
-                        .map(r -> r.getException().getMessage().split(" ")[0])
-                        .collect(Collectors.toSet());
-
-                log.warn("전송 실패한 유효하지 않은 토큰들을 DB에서 삭제합니다: {}", failedTokens);
-                fcmTokenRepository.deleteAllByTokenIn(failedTokens);
-            }
         } catch (FirebaseMessagingException e) {
             log.error("FCM 멀티캐스트 메시지 전송 실패", e);
             throw new BusinessException(ErrorCode.FCM_SEND_FAILED);
